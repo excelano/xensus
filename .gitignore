@@ -1,0 +1,41 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Code coverage profiles and other test artifacts
+*.out
+coverage.*
+*.coverprofile
+profile.cov
+
+# Dependency directories
+# vendor/
+
+# Go workspace file
+go.work
+go.work.sum
+
+# env file
+.env
+
+# Built binary at repo root
+/xensus
+
+# Local SQLite databases produced by dev runs
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+
+# Goreleaser output
+/dist/
+
+# Editor/IDE
+# .idea/
+# .vscode/
