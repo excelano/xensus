@@ -4,6 +4,47 @@
    adjusts the few places the registry's chrome needs.
    ============================================================ */
 
+/* --- Brand: Excelano mark in the nav, attribution in footer -- */
+/* The nav link carries block padding from axe.css; the brand link
+   overrides to flex so the mark and "Xensus" wordmark sit on one
+   baseline. The mark is the dark-background (white-legs) variant
+   because the nav bar is always deep purple in both themes. */
+.nav-brand a {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.nav-logo {
+    height: 24px;
+    width: auto;
+    display: block;
+}
+
+/* Footer credit: the circular badge is background-independent, so it
+   reads on both the light and dark footer surface. */
+.footer-attribution {
+    margin: 0.75rem 0 0;
+}
+
+.footer-attribution a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+}
+
+.footer-attribution a:hover {
+    color: var(--color-text);
+}
+
+.footer-logo {
+    height: 18px;
+    width: 18px;
+    display: block;
+}
+
 /* --- Nav: user identity + sign-out on the right ----------- */
 
 .nav-user {

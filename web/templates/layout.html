@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{.Title}} · Xensus</title>
+  <link rel="icon" type="image/svg+xml" href="/static/excelano-mark-circle.svg">
   <link rel="stylesheet" href="/static/brand.css">
   <link rel="stylesheet" href="/static/axe.css">
   <link rel="stylesheet" href="/static/xensus.css">
@@ -11,7 +12,7 @@
 <body>
   <nav>
     <ul>
-      <li><a href="/"><strong>Xensus</strong></a></li>
+      <li class="nav-brand"><a href="/"><img src="/static/excelano-mark.svg" alt="" class="nav-logo"><strong>Xensus</strong></a></li>
       {{if .Nav.ShowPersons}}<li><a href="/persons">Persons</a></li>{{end}}
       {{if .Nav.ShowSystems}}<li><a href="/systems">Systems</a></li>{{end}}
       {{if .Nav.ShowStewards}}<li><a href="/stewards">Stewards</a></li>{{end}}
@@ -32,6 +33,7 @@
   <footer>
     Xensus — identity registry
     {{if .User.IsSteward}}· <a href="/api/v1/export">Export registry (.zip)</a>{{end}}
+    <p class="footer-attribution"><a href="https://excelano.com"><img src="/static/excelano-mark-circle.svg" alt="" class="footer-logo">by Excelano</a></p>
   </footer>
 </body>
 </html>{{end}}
