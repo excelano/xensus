@@ -18,7 +18,7 @@ Tenant binding is one-way: once a Xensus deployment has been bound to a tenant (
 
 ## What Xensus stores
 
-Xensus stores its state in a single SQLite database file at the configured data directory (default `/var/lib/xensus/xensus.db`). The database holds:
+Xensus stores its state in a single SQLite database file (`xensus.sqlite`) inside the directory named by `XENSUS_DATA_DIR`, which is required at startup. The recommended `systemd` setup points this at `/var/lib/xensus`, so the database lives at `/var/lib/xensus/xensus.sqlite`. The database holds:
 
 - The bound Microsoft Entra tenant ID
 - Person records (X-IDs and the names stewards have entered)
