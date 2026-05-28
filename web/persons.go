@@ -26,12 +26,16 @@ type personRow struct {
 	Name string
 }
 
-// detailView is the template data for a single person page.
+// detailView is the template data for a single person page. Associations
+// are the person's current links; Systems is the active-system list that
+// fills the "associate with a system" dropdown (steward-only).
 type detailView struct {
-	Title  string
-	User   *auth.User
-	Person personView
-	Audit  []auditView
+	Title        string
+	User         *auth.User
+	Person       personView
+	Associations []associationRow
+	Systems      []systemOption
+	Audit        []auditView
 }
 
 type personView struct {
@@ -91,6 +95,18 @@ func (h *Handlers) PersonDetail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
+	links, err := store.ListAssociationsForPerson(r.Context(), h.DB, pid)
+	if err != nil {
+		slog.Error("web list associations", "err", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+	systems, err := store.ListSystems(r.Context(), h.DB, "")
+	if err != nil {
+		slog.Error("web list systems for associate", "err", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
 	rows, err := store.ListAuditForEntity(r.Context(), h.DB, "person", pid)
 	if err != nil {
 		slog.Error("web person audit", "err", err)
@@ -99,10 +115,12 @@ func (h *Handlers) PersonDetail(w http.ResponseWriter, r *http.Request) {
 	}
 	u, _ := auth.UserFrom(r.Context())
 	h.rd.render(w, http.StatusOK, "person_detail", detailView{
-		Title:  personTitle(p),
-		User:   u,
-		Person: toPersonView(p),
-		Audit:  toAuditViews(rows),
+		Title:        personTitle(p),
+		User:         u,
+		Person:       toPersonView(p),
+		Associations: toAssociationRows(links),
+		Systems:      toSystemOptions(systems),
+		Audit:        toAuditViews(rows),
 	})
 }
 

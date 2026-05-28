@@ -27,6 +27,8 @@ func (h *Handlers) Register(mux *http.ServeMux, authr *auth.Authenticator) {
 	mux.Handle("POST /persons", steward(h.CreatePerson))
 	mux.Handle("GET /persons/{id}", user(h.PersonDetail))
 	mux.Handle("POST /persons/{id}", steward(h.RenamePerson))
+	mux.Handle("POST /persons/{id}/associations", steward(h.AddAssociation))
+	mux.Handle("POST /persons/{id}/associations/{aid}/remove", steward(h.RemoveAssociation))
 
 	mux.Handle("GET /systems", user(h.ListSystems))
 	mux.Handle("POST /systems", steward(h.CreateSystem))

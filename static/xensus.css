@@ -142,3 +142,15 @@ button.danger:hover {
     color: var(--color-text-muted);
     font-size: 0.9rem;
 }
+
+/* --- Associations: per-row remove button -------------------- */
+/* The remove form lives in a table cell, so it carries no margin and its
+   danger button is sized down to sit on one row. */
+.assoc-remove {
+    margin: 0;
+}
+
+.assoc-remove button {
+    padding: 0.25rem 0.65rem;
+    font-size: 0.85rem;
+}

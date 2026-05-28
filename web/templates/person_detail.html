@@ -22,6 +22,55 @@
     <dd>{{.Person.UpdatedAt}} · {{.Person.UpdatedBy}}</dd>
   </dl>
 
+  <section class="associations">
+    <h2>Associations</h2>
+    {{if .Associations}}
+    <table>
+      <thead>
+        <tr><th>System</th><th>ID in system</th><th>Added</th>{{if $.User.IsSteward}}<th></th>{{end}}</tr>
+      </thead>
+      <tbody>
+        {{range .Associations}}
+        <tr>
+          <td><a href="/systems/{{.SystemID}}">{{.SystemName}}</a></td>
+          <td>{{if .ForeignID}}<code>{{.ForeignID}}</code>{{else}}—{{end}}</td>
+          <td><small>{{.CreatedAt}} · {{.CreatedBy}}</small></td>
+          {{if $.User.IsSteward}}
+          <td>
+            <form method="post" action="/persons/{{$.Person.ID}}/associations/{{.ID}}/remove" class="assoc-remove"
+                  onsubmit="return confirm('Remove the {{.SystemName}} association? This cannot be undone.');">
+              <button type="submit" class="danger">Remove</button>
+            </form>
+          </td>
+          {{end}}
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+    {{else}}
+    <p>Not associated with any system yet.</p>
+    {{end}}
+
+    {{if .User.IsSteward}}
+    {{if .Systems}}
+    <details class="new-entity">
+      <summary>Associate with a system</summary>
+      <form method="post" action="/persons/{{.Person.ID}}/associations">
+        <label for="assoc-system">System</label>
+        <select id="assoc-system" name="system_id" required>
+          {{range .Systems}}<option value="{{.ID}}">{{.Name}}</option>{{end}}
+        </select>
+        <label for="assoc-fid">ID in that system</label>
+        <input type="text" id="assoc-fid" name="foreign_id" placeholder="e.g. EMP-12345 (optional)">
+        <button type="submit">Associate</button>
+      </form>
+    </details>
+    {{else}}
+    <p><small>No active systems to associate yet. <a href="/systems">Add one</a> first.</small></p>
+    {{end}}
+    {{end}}
+  </section>
+
   <details>
     <summary>History ({{len .Audit}})</summary>
     {{if .Audit}}

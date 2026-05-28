@@ -48,6 +48,10 @@ func registerRoutes(mux *http.ServeMux, db *sql.DB, authr *auth.Authenticator) e
 	mux.Handle("POST /api/v1/persons", steward(apiH.CreatePerson))
 	mux.Handle("PATCH /api/v1/persons/{id}", steward(apiH.RenamePerson))
 
+	mux.Handle("GET /api/v1/persons/{id}/associations", user(apiH.ListAssociations))
+	mux.Handle("POST /api/v1/persons/{id}/associations", steward(apiH.CreateAssociation))
+	mux.Handle("DELETE /api/v1/persons/{id}/associations/{aid}", steward(apiH.RemoveAssociation))
+
 	mux.Handle("GET /api/v1/systems", user(apiH.ListSystems))
 	mux.Handle("GET /api/v1/systems.csv", user(apiH.ExportSystemsCSV))
 	mux.Handle("GET /api/v1/systems/disabled", user(apiH.ListDisabledSystems))
