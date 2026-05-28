@@ -37,7 +37,11 @@ func Run(ctx context.Context, cfg *config.Config) error {
 		slog.Warn("auth disabled — only /health is available", "reason", err.Error())
 		authr = nil
 	} else {
-		slog.Info("auth ready", "tenant_id", authr.TenantID())
+		if tid := authr.TenantID(); tid == "" {
+			slog.Info("auth ready — tenant not yet bound; first sign-in will bootstrap the deployment")
+		} else {
+			slog.Info("auth ready", "tenant_id", tid)
+		}
 		if authr.SessionKeyGenerated() {
 			slog.Warn("XENSUS_SESSION_KEY unset; sessions will be lost on restart — generate a key and set it before going to production")
 		}

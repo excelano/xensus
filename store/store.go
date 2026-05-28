@@ -54,6 +54,14 @@ func Open(dataDir string) (*sql.DB, error) {
 	return db, nil
 }
 
+// ApplyMigrations applies any pending migrations from the embedded FS
+// to an already-opened *sql.DB. Open calls this internally; the export
+// exists so that tests can spin up an in-memory database with the full
+// schema by calling sql.Open("sqlite", ":memory:") + ApplyMigrations.
+func ApplyMigrations(db *sql.DB) error {
+	return runMigrations(db, migrations.FS)
+}
+
 var migrationNameRE = regexp.MustCompile(`^(\d{4})_[^.]+\.sql$`)
 
 type migration struct {

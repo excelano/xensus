@@ -9,7 +9,12 @@ import (
 	"strings"
 	"time"
 
+	"errors"
+
 	"github.com/coreos/go-oidc/v3/oidc"
+
+	"github.com/excelano/xensus/core"
+	"github.com/excelano/xensus/store"
 )
 
 // Login starts the OIDC code flow: it generates state + nonce, stores
@@ -103,17 +108,54 @@ func (a *Authenticator) Callback(w http.ResponseWriter, r *http.Request) {
 
 // completeSignIn applies the invariant checks that don't require the
 // network and, on success, writes the session and redirects. Split out
-// so that the tenant-mismatch path is unit-testable without spinning
-// up an OIDC provider or oauth2 token endpoint.
+// so that bind-state branches are unit-testable without spinning up an
+// OIDC provider or oauth2 token endpoint.
+//
+// Bind state:
+//   - Unbound: this is the very first sign-in. core.Bootstrap binds the
+//     tenant + creates the first steward + writes the audit row in a
+//     single Tx. Bootstrap loses the race? Re-read the now-bound tenant
+//     and fall through to the bound-mode check.
+//   - Bound: tid must match the bound tenant or sign-in is refused with
+//     403 BEFORE any session cookie is set.
 func (a *Authenticator) completeSignIn(w http.ResponseWriter, r *http.Request, c Claims, ls *loginData) {
 	if c.Nonce != ls.Nonce {
 		slog.Warn("nonce mismatch", "upn", c.UPN)
 		http.Error(w, "nonce mismatch", http.StatusUnauthorized)
 		return
 	}
-	if c.TID != a.tenantID {
+
+	bound := a.getTenant()
+	if bound == "" {
+		stewardID, err := core.Bootstrap(r.Context(), a.db, core.BootstrapClaim{
+			OID: c.OID, UPN: c.UPN, TID: c.TID,
+		})
+		switch {
+		case err == nil:
+			a.setTenant(c.TID)
+			bound = c.TID
+			slog.Info("tenant bootstrapped",
+				"tid", c.TID, "first_steward_id", stewardID,
+				"first_steward_upn", c.UPN, "first_steward_oid", c.OID)
+		case errors.Is(err, core.ErrAlreadyBound):
+			actual, lookupErr := store.BoundTenantID(r.Context(), a.db)
+			if lookupErr != nil || actual == "" {
+				slog.Error("bootstrap race: failed to re-read tenant", "err", lookupErr)
+				http.Error(w, "bootstrap failed", http.StatusInternalServerError)
+				return
+			}
+			a.setTenant(actual)
+			bound = actual
+		default:
+			slog.Error("bootstrap failed", "err", err, "upn", c.UPN)
+			http.Error(w, "bootstrap failed", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	if c.TID != bound {
 		slog.Warn("tenant mismatch — refusing sign-in",
-			"got_tid", c.TID, "want_tid", a.tenantID, "upn", c.UPN)
+			"got_tid", c.TID, "want_tid", bound, "upn", c.UPN)
 		http.Error(w, "this Xensus deployment is bound to a different tenant", http.StatusForbidden)
 		return
 	}

@@ -46,9 +46,14 @@ func (a *Authenticator) Authenticate(next http.Handler) http.Handler {
 }
 
 func (a *Authenticator) tryAuthenticate(r *http.Request) *User {
+	bound := a.getTenant()
+	if bound == "" {
+		// No tenant bound yet — no authenticated sessions are possible.
+		return nil
+	}
 	if raw := extractBearer(r); raw != "" {
 		claims, err := a.verifier.Verify(r.Context(), raw)
-		if err != nil || claims.TID != a.tenantID {
+		if err != nil || claims.TID != bound {
 			return nil
 		}
 		return a.userFromClaims(r.Context(), claims)
@@ -57,7 +62,7 @@ func (a *Authenticator) tryAuthenticate(r *http.Request) *User {
 	if err != nil || sess == nil {
 		return nil
 	}
-	if sess.TID != a.tenantID {
+	if sess.TID != bound {
 		return nil
 	}
 	isSteward, _ := store.IsActiveSteward(r.Context(), a.db, sess.OID)
