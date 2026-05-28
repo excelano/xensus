@@ -13,4 +13,8 @@ var (
 	// ErrAlreadyBound is returned when a bootstrap is attempted against
 	// a deployment whose tenant_id is already set.
 	ErrAlreadyBound = errors.New("xensus tenant already bound")
+
+	// ErrNotFound is returned when an operation targets an entity (person,
+	// system, association, …) that does not exist.
+	ErrNotFound = errors.New("not found")
 )

@@ -86,3 +86,21 @@ func RequireUser(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+// RequireSteward gates mutating routes: 401 if unauthenticated, 403 if the
+// caller is a signed-in user but not an active steward. Reads stay open to
+// any signed-in user (RequireUser); only writes funnel through here.
+func RequireSteward(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		u, ok := UserFrom(r.Context())
+		if !ok {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+		if !u.IsSteward {
+			http.Error(w, "steward role required", http.StatusForbidden)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
