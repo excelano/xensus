@@ -13,7 +13,7 @@ import (
 	"github.com/excelano/xensus/store"
 )
 
-// listView is the template data for the people list page.
+// listView is the template data for the persons list page.
 type listView struct {
 	Title   string
 	User    *auth.User
@@ -69,7 +69,7 @@ func (h *Handlers) ListPersons(w http.ResponseWriter, r *http.Request) {
 	}
 	u, _ := auth.UserFrom(r.Context())
 	h.rd.render(w, http.StatusOK, "persons_list", listView{
-		Title:   "People",
+		Title:   "Persons",
 		User:    u,
 		Query:   q,
 		Persons: rows,
