@@ -1,0 +1,32 @@
+{{define "layout.html"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Title}} · Xensus</title>
+  <link rel="stylesheet" href="/static/brand.css">
+  <link rel="stylesheet" href="/static/axe.css">
+  <link rel="stylesheet" href="/static/xensus.css">
+</head>
+<body>
+  <nav>
+    <ul>
+      <li><a href="/persons"><strong>Xensus</strong></a></li>
+      {{with .User}}
+      <li class="nav-right"><span class="nav-user">{{.UPN}}{{if .IsSteward}} · steward{{end}}</span></li>
+      <li>
+        <form method="post" action="/auth/logout" class="nav-form">
+          <button type="submit">Sign out</button>
+        </form>
+      </li>
+      {{end}}
+    </ul>
+  </nav>
+  <main>
+    {{template "content" .}}
+  </main>
+  <footer>
+    Xensus — identity registry
+  </footer>
+</body>
+</html>{{end}}

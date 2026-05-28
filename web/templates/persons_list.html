@@ -1,0 +1,45 @@
+{{define "content"}}
+<article>
+  <header>
+    <h1>People</h1>
+    <p><small>{{len .Persons}} {{if eq (len .Persons) 1}}person{{else}}people{{end}} shown.</small></p>
+  </header>
+
+  <form method="get" action="/persons" class="search-form" role="search">
+    <input type="search" name="q" value="{{.Query}}" placeholder="Search by name" aria-label="Search by name">
+    <button type="submit">Search</button>
+    {{if .Query}}<a href="/persons" class="clear-link">Clear</a>{{end}}
+  </form>
+
+  {{if .User.IsSteward}}
+  <details class="new-person">
+    <summary>Add a person</summary>
+    <form method="post" action="/persons">
+      <label for="new-name">Name</label>
+      <input type="text" id="new-name" name="name" placeholder="Full name (optional)">
+      <button type="submit">Create</button>
+    </form>
+  </details>
+  {{end}}
+
+  {{if .Persons}}
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Name</th></tr>
+    </thead>
+    <tbody>
+      {{range .Persons}}
+      <tr>
+        <td><a href="/persons/{{.ID}}"><code>{{.ID}}</code></a></td>
+        <td><a href="/persons/{{.ID}}">{{if .Name}}{{.Name}}{{else}}<em>(no name)</em>{{end}}</a></td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p>{{if .Query}}No people match “{{.Query}}”.{{else}}No people in the registry yet.{{end}}</p>
+  {{end}}
+
+  <p><small><a href="/api/v1/persons.csv{{if .Query}}?q={{.Query}}{{end}}">Download CSV</a></small></p>
+</article>
+{{end}}

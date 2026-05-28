@@ -48,7 +48,9 @@ func Run(ctx context.Context, cfg *config.Config) error {
 	}
 
 	mux := http.NewServeMux()
-	registerRoutes(mux, db, authr)
+	if err := registerRoutes(mux, db, authr); err != nil {
+		return err
+	}
 
 	srv := &http.Server{
 		Addr:              cfg.Listen,

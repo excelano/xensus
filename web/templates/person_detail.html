@@ -1,0 +1,48 @@
+{{define "content"}}
+<article>
+  <header>
+    <p><small><a href="/persons">← All people</a></small></p>
+    <h1>{{if .Person.Name}}{{.Person.Name}}{{else}}<em>(no name)</em>{{end}}</h1>
+    <p><code>{{.Person.ID}}</code></p>
+  </header>
+
+  {{if .User.IsSteward}}
+  <form method="post" action="/persons/{{.Person.ID}}" class="rename-form">
+    <input type="text" name="name" value="{{.Person.Name}}" placeholder="Name" aria-label="Name">
+    <button type="submit">Save name</button>
+  </form>
+  {{else}}
+  <p><small>Renaming requires steward access.</small></p>
+  {{end}}
+
+  <dl class="meta">
+    <dt>Created</dt>
+    <dd>{{.Person.CreatedAt}} · {{.Person.CreatedBy}}</dd>
+    <dt>Updated</dt>
+    <dd>{{.Person.UpdatedAt}} · {{.Person.UpdatedBy}}</dd>
+  </dl>
+
+  <details>
+    <summary>History ({{len .Audit}})</summary>
+    {{if .Audit}}
+    <table>
+      <thead>
+        <tr><th>When</th><th>Action</th><th>By</th><th>Details</th></tr>
+      </thead>
+      <tbody>
+        {{range .Audit}}
+        <tr>
+          <td><small>{{.OccurredAt}}</small></td>
+          <td><code>{{.Action}}</code></td>
+          <td><small>{{.ActorUPN}}</small></td>
+          <td><small>{{.Details}}</small></td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+    {{else}}
+    <p>No recorded history.</p>
+    {{end}}
+  </details>
+</article>
+{{end}}

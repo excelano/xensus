@@ -1,0 +1,90 @@
+/* ============================================================
+   Xensus overrides — sit on top of brand.css + axe.css.
+   Kept deliberately small: Axe carries the look, this only
+   adjusts the few places the registry's chrome needs.
+   ============================================================ */
+
+/* --- Nav: user identity + sign-out on the right ----------- */
+
+.nav-user {
+    color: var(--color-nav-text);
+    opacity: 0.75;
+    font-size: 0.85rem;
+    padding: 0 0.5rem;
+    white-space: nowrap;
+}
+
+.nav-form {
+    margin: 0;
+}
+
+/* The sign-out button should read as a nav link, not an accent button. */
+.nav-form button {
+    background: none;
+    color: var(--color-nav-text);
+    opacity: 0.88;
+    padding: 0.4rem 0.875rem;
+    font-weight: 400;
+    font-size: 0.9rem;
+}
+
+.nav-form button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Inline single-row forms (search, rename) ------------- */
+
+.search-form,
+.rename-form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.search-form input,
+.rename-form input {
+    flex: 1;
+}
+
+.search-form button,
+.rename-form button {
+    flex: none;
+    white-space: nowrap;
+}
+
+.clear-link {
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+
+/* --- "Add a person" disclosure: stacked fields ------------ */
+
+.new-person {
+    margin-bottom: 1.5rem;
+}
+
+.new-person form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+    padding-top: 0.5rem;
+}
+
+.new-person button {
+    flex: none;
+}
+
+/* --- Detail metadata: compact label/value pairs ----------- */
+
+dl.meta dt {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+dl.meta dd {
+    margin-left: 0;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+}
