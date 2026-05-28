@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log/slog"
@@ -26,9 +27,10 @@ func writeError(w http.ResponseWriter, status int, msg string) {
 }
 
 // httpError maps a core sentinel error to the right HTTP status. Unknown
-// errors become 500 and are logged, so an unexpected failure never leaks
-// internal detail to the client but is still diagnosable from the logs.
-func httpError(w http.ResponseWriter, err error) {
+// errors become 500 and are logged with the request's context (so the log
+// line carries the request id), keeping internal detail out of the client
+// response while staying diagnosable from the logs.
+func httpError(ctx context.Context, w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, core.ErrNotFound):
 		writeError(w, http.StatusNotFound, "not found")
@@ -45,7 +47,7 @@ func httpError(w http.ResponseWriter, err error) {
 	case errors.Is(err, core.ErrAlreadyBound):
 		writeError(w, http.StatusConflict, "tenant already bound")
 	default:
-		slog.Error("unhandled api error", "err", err)
+		slog.ErrorContext(ctx, "unhandled api error", "err", err)
 		writeError(w, http.StatusInternalServerError, "internal error")
 	}
 }

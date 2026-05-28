@@ -31,9 +31,9 @@ func main() {
 		}
 	}
 
-	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+	slog.SetDefault(slog.New(contextHandler{slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		Level: slog.LevelInfo,
-	})))
+	})}))
 	slog.Info("xensus starting", "version", version)
 
 	cfg, err := config.FromEnv()

@@ -80,6 +80,10 @@ func registerRoutes(mux *http.ServeMux, db *sql.DB, authr *auth.Authenticator, a
 	mux.Handle("GET /api/v1/audit", audit(apiH.ListAudit))
 	mux.Handle("GET /api/v1/audit.csv", audit(apiH.ExportAuditCSV))
 
+	// The full-registry export bundles every surface (audit log included),
+	// so it is always steward-only, regardless of the per-surface read policy.
+	mux.Handle("GET /api/v1/export", steward(apiH.ExportRegistry))
+
 	mux.Handle("GET /api/v1/stewards", stewards(apiH.ListStewards))
 	mux.Handle("POST /api/v1/stewards", steward(apiH.PromoteSteward))
 	mux.Handle("DELETE /api/v1/stewards/{id}", steward(apiH.DemoteSteward))

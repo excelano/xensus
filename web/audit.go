@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/excelano/xensus/auth"
 	"github.com/excelano/xensus/id"
 	"github.com/excelano/xensus/store"
 )
@@ -21,8 +20,7 @@ var auditEntityTypes = []string{"person", "system", "association", "steward", "t
 // is true when the result hit the default row cap, so the page can hint
 // that older entries exist beyond the window.
 type auditPageView struct {
-	Title   string
-	User    *auth.User
+	BaseView
 	Filter  auditFilterView
 	Events  []auditEventRow
 	CSVHref string
@@ -71,26 +69,24 @@ func (h *Handlers) Audit(w http.ResponseWriter, r *http.Request) {
 		Limit:      store.DefaultAuditLimit,
 	})
 	if err != nil {
-		slog.Error("web list audit", "err", err)
+		slog.ErrorContext(r.Context(),"web list audit", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	actors, err := store.ListAuditActors(r.Context(), h.DB)
 	if err != nil {
-		slog.Error("web list audit actors", "err", err)
+		slog.ErrorContext(r.Context(),"web list audit actors", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	f.Actors = actors
 
-	u, _ := auth.UserFrom(r.Context())
 	h.rd.render(w, http.StatusOK, "audit", auditPageView{
-		Title:   "Audit log",
-		User:    u,
-		Filter:  f,
-		Events:  toAuditEventRows(events),
-		CSVHref: auditCSVHref(f),
-		Limited: len(events) >= store.DefaultAuditLimit,
+		BaseView: h.base(r, "Audit log"),
+		Filter:   f,
+		Events:   toAuditEventRows(events),
+		CSVHref:  auditCSVHref(f),
+		Limited:  len(events) >= store.DefaultAuditLimit,
 	})
 }
 

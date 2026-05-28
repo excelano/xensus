@@ -58,7 +58,7 @@ func Run(ctx context.Context, cfg *config.Config) error {
 
 	srv := &http.Server{
 		Addr:              cfg.Listen,
-		Handler:           mux,
+		Handler:           requestID(mux),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 

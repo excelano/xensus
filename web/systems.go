@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/excelano/xensus/auth"
 	"github.com/excelano/xensus/core"
 	"github.com/excelano/xensus/store"
 )
@@ -18,8 +17,7 @@ import (
 // systemsListView is the template data for the systems list page.
 // DisabledCount drives the "View N disabled" link to the disabled list.
 type systemsListView struct {
-	Title         string
-	User          *auth.User
+	BaseView
 	Query         string
 	Systems       []systemRow
 	DisabledCount int
@@ -27,8 +25,7 @@ type systemsListView struct {
 
 // disabledSystemsView is the template data for the disabled list page.
 type disabledSystemsView struct {
-	Title   string
-	User    *auth.User
+	BaseView
 	Systems []systemRow
 }
 
@@ -43,8 +40,7 @@ type systemRow struct {
 
 // systemDetailView is the template data for a single system page.
 type systemDetailView struct {
-	Title  string
-	User   *auth.User
+	BaseView
 	System systemView
 	Audit  []auditView
 }
@@ -67,20 +63,18 @@ func (h *Handlers) ListSystems(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	systems, err := store.ListSystems(r.Context(), h.DB, q)
 	if err != nil {
-		slog.Error("web list systems", "err", err)
+		slog.ErrorContext(r.Context(),"web list systems", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	disabledCount, err := store.CountDisabledSystems(r.Context(), h.DB)
 	if err != nil {
-		slog.Error("web count disabled systems", "err", err)
+		slog.ErrorContext(r.Context(),"web count disabled systems", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
-	u, _ := auth.UserFrom(r.Context())
 	h.rd.render(w, http.StatusOK, "systems_list", systemsListView{
-		Title:         "Systems",
-		User:          u,
+		BaseView:      h.base(r, "Systems"),
 		Query:         q,
 		Systems:       toSystemRows(systems),
 		DisabledCount: disabledCount,
@@ -92,15 +86,13 @@ func (h *Handlers) ListSystems(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) ListDisabledSystems(w http.ResponseWriter, r *http.Request) {
 	systems, err := store.ListDisabledSystems(r.Context(), h.DB)
 	if err != nil {
-		slog.Error("web list disabled systems", "err", err)
+		slog.ErrorContext(r.Context(),"web list disabled systems", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
-	u, _ := auth.UserFrom(r.Context())
 	h.rd.render(w, http.StatusOK, "disabled_systems", disabledSystemsView{
-		Title:   "Disabled systems",
-		User:    u,
-		Systems: toSystemRows(systems),
+		BaseView: h.base(r, "Disabled systems"),
+		Systems:  toSystemRows(systems),
 	})
 }
 
@@ -119,22 +111,20 @@ func (h *Handlers) SystemDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		slog.Error("web get system", "err", err)
+		slog.ErrorContext(r.Context(),"web get system", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	rows, err := store.ListAuditForEntity(r.Context(), h.DB, "system", sid)
 	if err != nil {
-		slog.Error("web system audit", "err", err)
+		slog.ErrorContext(r.Context(),"web system audit", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
-	u, _ := auth.UserFrom(r.Context())
 	h.rd.render(w, http.StatusOK, "system_detail", systemDetailView{
-		Title:  s.Name,
-		User:   u,
-		System: toSystemView(s),
-		Audit:  toAuditViews(rows),
+		BaseView: h.base(r, s.Name),
+		System:   toSystemView(s),
+		Audit:    toAuditViews(rows),
 	})
 }
 
@@ -152,7 +142,7 @@ func (h *Handlers) CreateSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		slog.Error("web create system", "err", err)
+		slog.ErrorContext(r.Context(),"web create system", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -180,7 +170,7 @@ func (h *Handlers) RenameSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		slog.Error("web rename system", "err", err)
+		slog.ErrorContext(r.Context(),"web rename system", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -218,7 +208,7 @@ func (h *Handlers) toggleSystem(
 		return
 	}
 	if err != nil {
-		slog.Error(logMsg, "err", err)
+		slog.ErrorContext(r.Context(),logMsg, "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}

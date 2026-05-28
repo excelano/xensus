@@ -14,6 +14,7 @@ import (
 // sign-in page rather than returning a bare 401, and requireSteward 403s
 // a signed-in non-steward who reaches a write route.
 func (h *Handlers) Register(mux *http.ServeMux, authr *auth.Authenticator, access config.Access) {
+	h.access = access
 	user := func(fn http.HandlerFunc) http.Handler {
 		return authr.Authenticate(requireUser(fn))
 	}
@@ -35,9 +36,13 @@ func (h *Handlers) Register(mux *http.ServeMux, authr *auth.Authenticator, acces
 	stewards := read(config.SurfaceStewards)
 	audit := read(config.SurfaceAudit)
 
-	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/persons", http.StatusFound)
-	})
+	// The landing route authenticates (without gating) so it can send the
+	// visitor to the first surface they may read. With the default open
+	// policy that's always /persons; under XENSUS_STEWARD_ONLY a non-steward
+	// is routed past a locked surface rather than bounced into a 403.
+	mux.Handle("GET /{$}", authr.Authenticate(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, landingPath(access, r), http.StatusFound)
+	})))
 	mux.Handle("GET /persons", persons(h.ListPersons))
 	mux.Handle("POST /persons", steward(h.CreatePerson))
 	mux.Handle("GET /persons/{id}", persons(h.PersonDetail))
@@ -59,6 +64,27 @@ func (h *Handlers) Register(mux *http.ServeMux, authr *auth.Authenticator, acces
 	mux.Handle("POST /systems/{id}", steward(h.RenameSystem))
 	mux.Handle("POST /systems/{id}/disable", steward(h.DisableSystem))
 	mux.Handle("POST /systems/{id}/enable", steward(h.EnableSystem))
+}
+
+// landingPath returns the path the root redirect should send a visitor to:
+// the first surface they may read. A steward reads everything, so they always
+// land on /persons; a non-steward skips any surface locked to stewards. If
+// every surface is locked (and the visitor isn't a steward) it falls back to
+// /persons, which then enforces the lock.
+func landingPath(access config.Access, r *http.Request) string {
+	u, _ := auth.UserFrom(r.Context())
+	steward := u != nil && u.IsSteward
+	for _, s := range []struct{ surface, path string }{
+		{config.SurfacePersons, "/persons"},
+		{config.SurfaceSystems, "/systems"},
+		{config.SurfaceStewards, "/stewards"},
+		{config.SurfaceAudit, "/audit"},
+	} {
+		if steward || !access.StewardOnly(s.surface) {
+			return s.path
+		}
+	}
+	return "/persons"
 }
 
 // requireUser sends anonymous visitors to sign in, preserving where they

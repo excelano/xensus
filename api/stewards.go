@@ -52,12 +52,12 @@ func toPendingStewardDTO(p store.PendingSteward) pendingStewardDTO {
 func (h *Handlers) ListStewards(w http.ResponseWriter, r *http.Request) {
 	stewards, err := store.ListActiveStewards(r.Context(), h.DB)
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	pending, err := store.ListPendingStewards(r.Context(), h.DB)
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	outStewards := make([]stewardDTO, 0, len(stewards))
@@ -81,7 +81,7 @@ func (h *Handlers) PromoteSteward(w http.ResponseWriter, r *http.Request) {
 	}
 	p, err := core.PromoteSteward(r.Context(), h.DB, actorFrom(r), in.UPN)
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, toPendingStewardDTO(p))
@@ -97,7 +97,7 @@ func (h *Handlers) DemoteSteward(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if _, err := core.DemoteSteward(r.Context(), h.DB, actorFrom(r), sid); err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -113,7 +113,7 @@ func (h *Handlers) CancelInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := core.CancelStewardInvite(r.Context(), h.DB, actorFrom(r), pid); err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)

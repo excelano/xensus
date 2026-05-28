@@ -47,7 +47,7 @@ func toAuditEventDTO(e store.AuditEvent) auditEventDTO {
 func (h *Handlers) ListAudit(w http.ResponseWriter, r *http.Request) {
 	events, err := store.ListAudit(r.Context(), h.DB, auditQueryFrom(r))
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	out := make([]auditEventDTO, 0, len(events))
@@ -68,24 +68,14 @@ func (h *Handlers) ExportAuditCSV(w http.ResponseWriter, r *http.Request) {
 	}
 	events, err := store.ListAudit(r.Context(), h.DB, q)
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
 	w.Header().Set("Content-Disposition", `attachment; filename="audit.csv"`)
 
 	cw := csv.NewWriter(w)
-	_ = cw.Write([]string{"id", "occurred_at", "actor_oid", "actor_upn", "action", "entity_type", "entity_id", "details"})
-	for _, e := range events {
-		entityID := ""
-		if e.EntityID > 0 {
-			entityID = strconv.FormatInt(e.EntityID, 10)
-		}
-		_ = cw.Write([]string{
-			strconv.FormatInt(e.ID, 10), e.OccurredAt, e.ActorOID, e.ActorUPN,
-			e.Action, e.EntityType, entityID, e.Details,
-		})
-	}
+	writeAuditCSV(cw, events)
 	cw.Flush()
 }
 

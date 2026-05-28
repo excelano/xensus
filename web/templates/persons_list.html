@@ -1,5 +1,13 @@
 {{define "content"}}
 <article>
+  {{if .ShowWelcome}}
+  <section class="welcome">
+    <h1>Welcome to Xensus</h1>
+    <p>You're the first steward of this registry. Xensus hands out a permanent ID for each person and records where they show up across your systems — HR, Active Directory, FieldGlass, and the rest. It doesn't sync or deduplicate; it records what you, the steward, assert.</p>
+    <p>Two steps to get going: add the systems you want to track on the <a href="/systems">Systems</a> page, then add people below and link each one to the systems they appear in.</p>
+  </section>
+  {{end}}
+
   <header>
     <h1>Persons</h1>
     <p><small>{{len .Persons}} {{if eq (len .Persons) 1}}person{{else}}persons{{end}} shown.</small></p>
@@ -12,7 +20,7 @@
   </form>
 
   {{if .User.IsSteward}}
-  <details class="new-entity">
+  <details class="new-entity"{{if and (not .Persons) (not .Query)}} open{{end}}>
     <summary>Add a person</summary>
     <form method="post" action="/persons">
       <label for="new-name">Name</label>
@@ -36,8 +44,12 @@
       {{end}}
     </tbody>
   </table>
+  {{else if .Query}}
+  <p>No persons match “{{.Query}}”.</p>
+  {{else if .User.IsSteward}}
+  <p>No persons yet. Use <strong>Add a person</strong> above to create the first one.</p>
   {{else}}
-  <p>{{if .Query}}No persons match “{{.Query}}”.{{else}}No persons in the registry yet.{{end}}</p>
+  <p>No persons in the registry yet.</p>
   {{end}}
 
   <p><small><a href="/api/v1/persons.csv{{if .Query}}?q={{.Query}}{{end}}">Download CSV</a></small></p>

@@ -6,6 +6,7 @@
 package store
 
 import (
+	"context"
 	"database/sql"
 	"embed"
 	"fmt"
@@ -52,6 +53,19 @@ func Open(dataDir string) (*sql.DB, error) {
 		return nil, err
 	}
 	return db, nil
+}
+
+// IsRegistryEmpty reports whether the registry holds no persons and no
+// systems. It backs the first-run welcome, which shows only until the first
+// data lands and then self-clears.
+func IsRegistryEmpty(ctx context.Context, db *sql.DB) (bool, error) {
+	var n int
+	err := db.QueryRowContext(ctx,
+		`SELECT (SELECT COUNT(*) FROM persons) + (SELECT COUNT(*) FROM systems)`).Scan(&n)
+	if err != nil {
+		return false, fmt.Errorf("registry empty check: %w", err)
+	}
+	return n == 0, nil
 }
 
 // ApplyMigrations applies any pending migrations from the embedded FS

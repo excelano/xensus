@@ -6,14 +6,21 @@
 // identical — including the audit-on-write invariant.
 package web
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"github.com/excelano/xensus/config"
+)
 
 // Handlers carries the dependencies shared by the HTML page handlers: the
-// database and the parsed templates. New parses templates up front so a
-// malformed template fails startup rather than a live request.
+// database, the parsed templates, and the read-access policy (used to decide
+// which nav links a non-steward should see). New parses templates up front so
+// a malformed template fails startup rather than a live request; Register sets
+// the access policy when it wires the routes.
 type Handlers struct {
-	DB *sql.DB
-	rd *renderer
+	DB     *sql.DB
+	rd     *renderer
+	access config.Access
 }
 
 // New builds the web handler set, parsing all page templates. It returns

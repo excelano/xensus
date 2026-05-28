@@ -11,11 +11,11 @@
 <body>
   <nav>
     <ul>
-      <li><a href="/persons"><strong>Xensus</strong></a></li>
-      <li><a href="/persons">Persons</a></li>
-      <li><a href="/systems">Systems</a></li>
-      <li><a href="/stewards">Stewards</a></li>
-      <li><a href="/audit">Audit</a></li>
+      <li><a href="/"><strong>Xensus</strong></a></li>
+      {{if .Nav.ShowPersons}}<li><a href="/persons">Persons</a></li>{{end}}
+      {{if .Nav.ShowSystems}}<li><a href="/systems">Systems</a></li>{{end}}
+      {{if .Nav.ShowStewards}}<li><a href="/stewards">Stewards</a></li>{{end}}
+      {{if .Nav.ShowAudit}}<li><a href="/audit">Audit</a></li>{{end}}
       {{with .User}}
       <li class="nav-right"><span class="nav-user">{{.UPN}}{{if .IsSteward}} · steward{{end}}</span></li>
       <li>
@@ -31,6 +31,7 @@
   </main>
   <footer>
     Xensus — identity registry
+    {{if .User.IsSteward}}· <a href="/api/v1/export">Export registry (.zip)</a>{{end}}
   </footer>
 </body>
 </html>{{end}}

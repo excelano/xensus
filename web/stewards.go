@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/excelano/xensus/auth"
 	"github.com/excelano/xensus/core"
 	"github.com/excelano/xensus/store"
 )
@@ -18,8 +17,7 @@ import (
 // caller's User so the page can show the invite form and remove buttons only
 // to stewards.
 type stewardsView struct {
-	Title    string
-	User     *auth.User
+	BaseView
 	Stewards []stewardWebRow
 	Pending  []pendingWebRow
 }
@@ -48,24 +46,23 @@ type pendingWebRow struct {
 func (h *Handlers) Stewards(w http.ResponseWriter, r *http.Request) {
 	stewards, err := store.ListActiveStewards(r.Context(), h.DB)
 	if err != nil {
-		slog.Error("web list stewards", "err", err)
+		slog.ErrorContext(r.Context(),"web list stewards", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	pending, err := store.ListPendingStewards(r.Context(), h.DB)
 	if err != nil {
-		slog.Error("web list pending stewards", "err", err)
+		slog.ErrorContext(r.Context(),"web list pending stewards", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
-	u, _ := auth.UserFrom(r.Context())
+	base := h.base(r, "Stewards")
 	selfOID := ""
-	if u != nil {
-		selfOID = u.OID
+	if base.User != nil {
+		selfOID = base.User.OID
 	}
 	h.rd.render(w, http.StatusOK, "stewards", stewardsView{
-		Title:    "Stewards",
-		User:     u,
+		BaseView: base,
 		Stewards: toStewardWebRows(stewards, selfOID),
 		Pending:  toPendingWebRows(pending),
 	})
@@ -91,7 +88,7 @@ func (h *Handlers) AddSteward(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "that user already has a pending invitation", http.StatusConflict)
 		return
 	case err != nil:
-		slog.Error("web promote steward", "err", err)
+		slog.ErrorContext(r.Context(),"web promote steward", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -118,7 +115,7 @@ func (h *Handlers) RemoveSteward(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "you cannot remove yourself — promote a successor first", http.StatusConflict)
 		return
 	case err != nil:
-		slog.Error("web demote steward", "err", err)
+		slog.ErrorContext(r.Context(),"web demote steward", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -140,7 +137,7 @@ func (h *Handlers) CancelInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		slog.Error("web cancel invite", "err", err)
+		slog.ErrorContext(r.Context(),"web cancel invite", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}

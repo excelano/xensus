@@ -59,12 +59,12 @@ func (h *Handlers) ListAssociations(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusNotFound, "not found")
 		return
 	} else if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	links, err := store.ListAssociationsForPerson(r.Context(), h.DB, pid)
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	out := make([]associationDTO, 0, len(links))
@@ -92,7 +92,7 @@ func (h *Handlers) CreateAssociation(w http.ResponseWriter, r *http.Request) {
 	}
 	a, err := core.CreateAssociation(r.Context(), h.DB, actorFrom(r), pid, in.SystemID, in.ForeignID)
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, toAssociationDTO(a))
@@ -114,7 +114,7 @@ func (h *Handlers) RemoveAssociation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := core.RemoveAssociation(r.Context(), h.DB, actorFrom(r), pid, aid); err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)

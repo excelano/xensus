@@ -12,7 +12,7 @@
   </form>
 
   {{if .User.IsSteward}}
-  <details class="new-entity">
+  <details class="new-entity"{{if and (not .Systems) (not .Query)}} open{{end}}>
     <summary>Add a system</summary>
     <form method="post" action="/systems">
       <label for="new-name">Name</label>
@@ -36,8 +36,12 @@
       {{end}}
     </tbody>
   </table>
+  {{else if .Query}}
+  <p>No systems match “{{.Query}}”.</p>
+  {{else if .User.IsSteward}}
+  <p>No systems yet. Use <strong>Add a system</strong> above to register the first one.</p>
   {{else}}
-  <p>{{if .Query}}No systems match “{{.Query}}”.{{else}}No systems in the registry yet.{{end}}</p>
+  <p>No systems in the registry yet.</p>
   {{end}}
 
   {{if .DisabledCount}}

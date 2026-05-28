@@ -51,7 +51,7 @@ type personInput struct {
 func (h *Handlers) ListPersons(w http.ResponseWriter, r *http.Request) {
 	persons, err := store.ListPersons(r.Context(), h.DB, r.URL.Query().Get("q"))
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	out := make([]personDTO, 0, len(persons))
@@ -74,7 +74,7 @@ func (h *Handlers) GetPerson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, toPersonDTO(p))
@@ -89,7 +89,7 @@ func (h *Handlers) CreatePerson(w http.ResponseWriter, r *http.Request) {
 	actor := actorFrom(r)
 	p, err := core.CreatePerson(r.Context(), h.DB, actor, in.Name)
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, toPersonDTO(p))
@@ -108,7 +108,7 @@ func (h *Handlers) RenamePerson(w http.ResponseWriter, r *http.Request) {
 	}
 	p, err := core.RenamePerson(r.Context(), h.DB, actorFrom(r), pid, in.Name)
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, toPersonDTO(p))
@@ -119,19 +119,14 @@ func (h *Handlers) RenamePerson(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) ExportCSV(w http.ResponseWriter, r *http.Request) {
 	persons, err := store.ListPersons(r.Context(), h.DB, r.URL.Query().Get("q"))
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
 	w.Header().Set("Content-Disposition", `attachment; filename="persons.csv"`)
 
 	cw := csv.NewWriter(w)
-	_ = cw.Write([]string{"id", "name", "created_at", "created_by", "updated_at", "updated_by"})
-	for _, p := range persons {
-		_ = cw.Write([]string{
-			id.Format(p.ID), p.Name, p.CreatedAt, p.CreatedBy, p.UpdatedAt, p.UpdatedBy,
-		})
-	}
+	writePersonsCSV(cw, persons)
 	cw.Flush()
 }
 

@@ -53,7 +53,7 @@ type systemInput struct {
 func (h *Handlers) ListSystems(w http.ResponseWriter, r *http.Request) {
 	systems, err := store.ListSystems(r.Context(), h.DB, r.URL.Query().Get("q"))
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	out := make([]systemDTO, 0, len(systems))
@@ -68,7 +68,7 @@ func (h *Handlers) ListSystems(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) ListDisabledSystems(w http.ResponseWriter, r *http.Request) {
 	systems, err := store.ListDisabledSystems(r.Context(), h.DB)
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	out := make([]systemDTO, 0, len(systems))
@@ -92,7 +92,7 @@ func (h *Handlers) GetSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, toSystemDTO(s))
@@ -106,7 +106,7 @@ func (h *Handlers) CreateSystem(w http.ResponseWriter, r *http.Request) {
 	}
 	s, err := core.CreateSystem(r.Context(), h.DB, actorFrom(r), in.Name)
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	writeJSON(w, http.StatusCreated, toSystemDTO(s))
@@ -125,7 +125,7 @@ func (h *Handlers) RenameSystem(w http.ResponseWriter, r *http.Request) {
 	}
 	s, err := core.RenameSystem(r.Context(), h.DB, actorFrom(r), sid, in.Name)
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, toSystemDTO(s))
@@ -143,7 +143,7 @@ func (h *Handlers) DisableSystem(w http.ResponseWriter, r *http.Request) {
 	}
 	s, err := core.DisableSystem(r.Context(), h.DB, actorFrom(r), sid)
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, toSystemDTO(s))
@@ -159,7 +159,7 @@ func (h *Handlers) EnableSystem(w http.ResponseWriter, r *http.Request) {
 	}
 	s, err := core.EnableSystem(r.Context(), h.DB, actorFrom(r), sid)
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, toSystemDTO(s))
@@ -170,7 +170,7 @@ func (h *Handlers) EnableSystem(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) ExportSystemsCSV(w http.ResponseWriter, r *http.Request) {
 	systems, err := store.ListSystems(r.Context(), h.DB, r.URL.Query().Get("q"))
 	if err != nil {
-		httpError(w, err)
+		httpError(r.Context(), w, err)
 		return
 	}
 	w.Header().Set("Content-Type", "text/csv; charset=utf-8")

@@ -13,12 +13,14 @@ import (
 	"github.com/excelano/xensus/store"
 )
 
-// listView is the template data for the persons list page.
+// listView is the template data for the persons list page. ShowWelcome drives
+// the first-run orientation panel, shown to a steward while the registry is
+// still empty and self-clearing once any person or system exists.
 type listView struct {
-	Title   string
-	User    *auth.User
-	Query   string
-	Persons []personRow
+	BaseView
+	Query       string
+	Persons     []personRow
+	ShowWelcome bool
 }
 
 type personRow struct {
@@ -30,8 +32,7 @@ type personRow struct {
 // are the person's current links; Systems is the active-system list that
 // fills the "associate with a system" dropdown (steward-only).
 type detailView struct {
-	Title        string
-	User         *auth.User
+	BaseView
 	Person       personView
 	Associations []associationRow
 	Systems      []systemOption
@@ -59,7 +60,7 @@ func (h *Handlers) ListPersons(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	persons, err := store.ListPersons(r.Context(), h.DB, q)
 	if err != nil {
-		slog.Error("web list persons", "err", err)
+		slog.ErrorContext(r.Context(),"web list persons", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -67,12 +68,22 @@ func (h *Handlers) ListPersons(w http.ResponseWriter, r *http.Request) {
 	for _, p := range persons {
 		rows = append(rows, personRow{ID: id.Format(p.ID), Name: p.Name})
 	}
-	u, _ := auth.UserFrom(r.Context())
+	base := h.base(r, "Persons")
+	showWelcome := false
+	if base.User != nil && base.User.IsSteward && q == "" {
+		empty, err := store.IsRegistryEmpty(r.Context(), h.DB)
+		if err != nil {
+			slog.ErrorContext(r.Context(), "web registry empty check", "err", err)
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
+		}
+		showWelcome = empty
+	}
 	h.rd.render(w, http.StatusOK, "persons_list", listView{
-		Title:   "Persons",
-		User:    u,
-		Query:   q,
-		Persons: rows,
+		BaseView:    base,
+		Query:       q,
+		Persons:     rows,
+		ShowWelcome: showWelcome,
 	})
 }
 
@@ -91,32 +102,30 @@ func (h *Handlers) PersonDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		slog.Error("web get person", "err", err)
+		slog.ErrorContext(r.Context(),"web get person", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	links, err := store.ListAssociationsForPerson(r.Context(), h.DB, pid)
 	if err != nil {
-		slog.Error("web list associations", "err", err)
+		slog.ErrorContext(r.Context(),"web list associations", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	systems, err := store.ListSystems(r.Context(), h.DB, "")
 	if err != nil {
-		slog.Error("web list systems for associate", "err", err)
+		slog.ErrorContext(r.Context(),"web list systems for associate", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	rows, err := store.ListAuditForEntity(r.Context(), h.DB, "person", pid)
 	if err != nil {
-		slog.Error("web person audit", "err", err)
+		slog.ErrorContext(r.Context(),"web person audit", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
-	u, _ := auth.UserFrom(r.Context())
 	h.rd.render(w, http.StatusOK, "person_detail", detailView{
-		Title:        personTitle(p),
-		User:         u,
+		BaseView:     h.base(r, personTitle(p)),
 		Person:       toPersonView(p),
 		Associations: toAssociationRows(links),
 		Systems:      toSystemOptions(systems),
@@ -134,7 +143,7 @@ func (h *Handlers) CreatePerson(w http.ResponseWriter, r *http.Request) {
 	}
 	p, err := core.CreatePerson(r.Context(), h.DB, actorFrom(r), r.PostFormValue("name"))
 	if err != nil {
-		slog.Error("web create person", "err", err)
+		slog.ErrorContext(r.Context(),"web create person", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -160,7 +169,7 @@ func (h *Handlers) RenamePerson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		slog.Error("web rename person", "err", err)
+		slog.ErrorContext(r.Context(),"web rename person", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}

@@ -84,6 +84,32 @@ func DeleteAssociation(ctx context.Context, tx *sql.Tx, id int64) (int64, error)
 	return n, nil
 }
 
+// ListAllAssociations returns every association in the registry, each with
+// its system name joined in, ordered by person then association ID — a
+// stable order for the full-registry export. Duplicates are included by
+// design (invariant #3).
+func ListAllAssociations(ctx context.Context, db *sql.DB) ([]Association, error) {
+	rows, err := db.QueryContext(ctx,
+		`SELECT `+associationColumns+` ORDER BY a.person_id, a.id`)
+	if err != nil {
+		return nil, fmt.Errorf("list all associations: %w", err)
+	}
+	defer rows.Close()
+
+	var out []Association
+	for rows.Next() {
+		a, err := scanAssociation(rows)
+		if err != nil {
+			return nil, fmt.Errorf("scan association: %w", err)
+		}
+		out = append(out, a)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate associations: %w", err)
+	}
+	return out, nil
+}
+
 // ListAssociationsForPerson returns a person's current links, ordered by
 // system name (case-insensitive) then association ID. Duplicates (same
 // system listed twice) are allowed and both appear.
