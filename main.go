@@ -64,6 +64,8 @@ func printHelp() {
 	fmt.Println("  XENSUS_OIDC_REDIRECT_URL   OIDC callback URL (e.g. https://xensus.example.com/auth/callback)")
 	fmt.Println("  XENSUS_SESSION_KEY         base64 32-byte key for encrypted session cookies")
 	fmt.Println("  XENSUS_TRUST_PROXY         set to true behind a TLS-terminating proxy")
+	fmt.Println("  XENSUS_STEWARD_ONLY        comma list of read surfaces to lock to stewards")
+	fmt.Println("                             (persons, systems, stewards, audit); default: all open")
 	fmt.Println()
 	fmt.Println("See https://github.com/excelano/xensus for setup details.")
 }

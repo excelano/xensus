@@ -1,0 +1,63 @@
+{{define "content"}}
+<article>
+  <header>
+    <h1>Audit log</h1>
+    <p><small>{{len .Events}} {{if eq (len .Events) 1}}event{{else}}events{{end}} shown, newest first.</small></p>
+  </header>
+
+  <form method="get" action="/audit" class="filter-form" role="search">
+    <label for="filter-type">Type</label>
+    <select id="filter-type" name="entity_type">
+      <option value=""{{if eq .Filter.EntityType ""}} selected{{end}}>All types</option>
+      {{range .Filter.EntityTypes}}
+      <option value="{{.}}"{{if eq . $.Filter.EntityType}} selected{{end}}>{{.}}</option>
+      {{end}}
+    </select>
+
+    <label for="filter-actor">Actor</label>
+    <select id="filter-actor" name="actor">
+      <option value=""{{if eq .Filter.Actor ""}} selected{{end}}>Anyone</option>
+      {{range .Filter.Actors}}
+      <option value="{{.}}"{{if eq . $.Filter.Actor}} selected{{end}}>{{.}}</option>
+      {{end}}
+    </select>
+
+    <label for="filter-from">From</label>
+    <input type="date" id="filter-from" name="from" value="{{.Filter.From}}">
+
+    <label for="filter-to">To</label>
+    <input type="date" id="filter-to" name="to" value="{{.Filter.To}}">
+
+    <button type="submit">Filter</button>
+    {{if or .Filter.EntityType .Filter.Actor .Filter.From .Filter.To}}
+    <a href="/audit" class="clear-link">Clear</a>
+    {{end}}
+  </form>
+
+  {{if .Events}}
+  <table>
+    <thead>
+      <tr><th>When</th><th>Actor</th><th>Action</th><th>Entity</th><th>Details</th></tr>
+    </thead>
+    <tbody>
+      {{range .Events}}
+      <tr>
+        <td><small>{{.OccurredAt}}</small></td>
+        <td><small>{{.ActorUPN}}</small></td>
+        <td><code>{{.Action}}</code></td>
+        <td>{{if .EntityHref}}<a href="{{.EntityHref}}">{{.EntityLabel}}</a>{{else}}{{.EntityLabel}}{{end}}</td>
+        <td><small>{{.Details}}</small></td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{if .Limited}}
+  <p><small>Showing the most recent {{len .Events}} events. Narrow the filters or download the CSV for the full set.</small></p>
+  {{end}}
+  {{else}}
+  <p>No audit events match the current filters.</p>
+  {{end}}
+
+  <p><small><a href="{{.CSVHref}}">Download CSV</a></small></p>
+</article>
+{{end}}

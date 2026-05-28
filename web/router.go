@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"github.com/excelano/xensus/auth"
+	"github.com/excelano/xensus/config"
 )
 
 // Register wires the HTML page routes onto mux. Every route runs through
@@ -12,33 +13,49 @@ import (
 // web-flavored gate: requireUser redirects anonymous visitors to the
 // sign-in page rather than returning a bare 401, and requireSteward 403s
 // a signed-in non-steward who reaches a write route.
-func (h *Handlers) Register(mux *http.ServeMux, authr *auth.Authenticator) {
+func (h *Handlers) Register(mux *http.ServeMux, authr *auth.Authenticator, access config.Access) {
 	user := func(fn http.HandlerFunc) http.Handler {
 		return authr.Authenticate(requireUser(fn))
 	}
 	steward := func(fn http.HandlerFunc) http.Handler {
 		return authr.Authenticate(requireSteward(fn))
 	}
+	// read picks a surface's read gate to mirror the JSON API: steward-only
+	// when locked via XENSUS_STEWARD_ONLY, otherwise open to any signed-in
+	// user. A locked surface 403s a signed-in non-steward (the web gate's
+	// behavior) rather than returning a bare 401.
+	read := func(surface string) func(http.HandlerFunc) http.Handler {
+		if access.StewardOnly(surface) {
+			return steward
+		}
+		return user
+	}
+	persons := read(config.SurfacePersons)
+	systems := read(config.SurfaceSystems)
+	stewards := read(config.SurfaceStewards)
+	audit := read(config.SurfaceAudit)
 
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/persons", http.StatusFound)
 	})
-	mux.Handle("GET /persons", user(h.ListPersons))
+	mux.Handle("GET /persons", persons(h.ListPersons))
 	mux.Handle("POST /persons", steward(h.CreatePerson))
-	mux.Handle("GET /persons/{id}", user(h.PersonDetail))
+	mux.Handle("GET /persons/{id}", persons(h.PersonDetail))
 	mux.Handle("POST /persons/{id}", steward(h.RenamePerson))
 	mux.Handle("POST /persons/{id}/associations", steward(h.AddAssociation))
 	mux.Handle("POST /persons/{id}/associations/{aid}/remove", steward(h.RemoveAssociation))
 
-	mux.Handle("GET /stewards", user(h.Stewards))
+	mux.Handle("GET /stewards", stewards(h.Stewards))
 	mux.Handle("POST /stewards", steward(h.AddSteward))
 	mux.Handle("POST /stewards/{id}/remove", steward(h.RemoveSteward))
 	mux.Handle("POST /stewards/pending/{id}/cancel", steward(h.CancelInvite))
 
-	mux.Handle("GET /systems", user(h.ListSystems))
+	mux.Handle("GET /audit", audit(h.Audit))
+
+	mux.Handle("GET /systems", systems(h.ListSystems))
 	mux.Handle("POST /systems", steward(h.CreateSystem))
-	mux.Handle("GET /systems/disabled", user(h.ListDisabledSystems))
-	mux.Handle("GET /systems/{id}", user(h.SystemDetail))
+	mux.Handle("GET /systems/disabled", systems(h.ListDisabledSystems))
+	mux.Handle("GET /systems/{id}", systems(h.SystemDetail))
 	mux.Handle("POST /systems/{id}", steward(h.RenameSystem))
 	mux.Handle("POST /systems/{id}/disable", steward(h.DisableSystem))
 	mux.Handle("POST /systems/{id}/enable", steward(h.EnableSystem))

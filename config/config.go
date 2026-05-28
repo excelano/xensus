@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -22,6 +23,65 @@ type Config struct {
 	OIDCRedirectURL  string
 	SessionKey       string
 	TrustProxy       bool
+	Access           Access
+}
+
+// Read-access surfaces that XENSUS_STEWARD_ONLY can lock to stewards. Each
+// names a group of read routes — its list, detail, CSV, and any nested
+// reads. Writes always require a steward regardless of this setting.
+const (
+	SurfacePersons  = "persons"
+	SurfaceSystems  = "systems"
+	SurfaceStewards = "stewards"
+	SurfaceAudit    = "audit"
+)
+
+// accessSurfaces is the closed set of names XENSUS_STEWARD_ONLY accepts,
+// in the order they read most naturally for logging.
+var accessSurfaces = []string{SurfacePersons, SurfaceSystems, SurfaceStewards, SurfaceAudit}
+
+// Access records which read surfaces are restricted to stewards. Its zero
+// value restricts nothing: every surface is open to any signed-in user,
+// which is the documented default. A surface absent from the set is open.
+type Access struct {
+	stewardOnly map[string]bool
+}
+
+// StewardOnly reports whether reads of the named surface require a steward.
+func (a Access) StewardOnly(surface string) bool {
+	return a.stewardOnly[surface]
+}
+
+// Restricted lists the restricted surfaces in declaration order, so startup
+// logging can show the effective policy at a glance.
+func (a Access) Restricted() []string {
+	var out []string
+	for _, s := range accessSurfaces {
+		if a.stewardOnly[s] {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
+// parseAccess reads XENSUS_STEWARD_ONLY: a comma-separated list of read
+// surfaces to lock to stewards. Unset or empty restricts nothing. An
+// unrecognized name is a hard error rather than a silent skip — a typo
+// like "audt" would otherwise leave audit world-readable to the tenant
+// when the operator believed they had restricted it, so we refuse to start.
+func parseAccess(raw string) (Access, error) {
+	a := Access{stewardOnly: make(map[string]bool)}
+	for _, field := range strings.Split(raw, ",") {
+		name := strings.ToLower(strings.TrimSpace(field))
+		if name == "" {
+			continue
+		}
+		if !slices.Contains(accessSurfaces, name) {
+			return Access{}, fmt.Errorf("XENSUS_STEWARD_ONLY: unknown surface %q (valid: %s)", name, strings.Join(accessSurfaces, ", "))
+		}
+		a.stewardOnly[name] = true
+	}
+	return a, nil
 }
 
 // FromEnv reads the XENSUS_* environment variables and returns a Config.
@@ -43,6 +103,11 @@ func FromEnv() (*Config, error) {
 	if !strings.Contains(c.Listen, ":") {
 		return nil, fmt.Errorf("XENSUS_LISTEN %q is not a valid listen address; want host:port or :port", c.Listen)
 	}
+	access, err := parseAccess(os.Getenv("XENSUS_STEWARD_ONLY"))
+	if err != nil {
+		return nil, err
+	}
+	c.Access = access
 	return c, nil
 }
 

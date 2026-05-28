@@ -58,6 +58,26 @@
     font-size: 0.9rem;
 }
 
+/* --- Audit filter: a wrapping row of labeled controls ----- */
+
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.filter-form label {
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.filter-form select,
+.filter-form input {
+    flex: none;
+}
+
 /* --- "Add a …" disclosure: stacked fields ----------------- */
 
 .new-entity {

@@ -47,8 +47,12 @@ func Run(ctx context.Context, cfg *config.Config) error {
 		}
 	}
 
+	if restricted := cfg.Access.Restricted(); len(restricted) > 0 {
+		slog.Info("read access restricted to stewards", "surfaces", restricted)
+	}
+
 	mux := http.NewServeMux()
-	if err := registerRoutes(mux, db, authr); err != nil {
+	if err := registerRoutes(mux, db, authr, cfg.Access); err != nil {
 		return err
 	}
 
