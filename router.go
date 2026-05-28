@@ -48,6 +48,15 @@ func registerRoutes(mux *http.ServeMux, db *sql.DB, authr *auth.Authenticator) e
 	mux.Handle("POST /api/v1/persons", steward(apiH.CreatePerson))
 	mux.Handle("PATCH /api/v1/persons/{id}", steward(apiH.RenamePerson))
 
+	mux.Handle("GET /api/v1/systems", user(apiH.ListSystems))
+	mux.Handle("GET /api/v1/systems.csv", user(apiH.ExportSystemsCSV))
+	mux.Handle("GET /api/v1/systems/disabled", user(apiH.ListDisabledSystems))
+	mux.Handle("GET /api/v1/systems/{id}", user(apiH.GetSystem))
+	mux.Handle("POST /api/v1/systems", steward(apiH.CreateSystem))
+	mux.Handle("PATCH /api/v1/systems/{id}", steward(apiH.RenameSystem))
+	mux.Handle("POST /api/v1/systems/{id}/disable", steward(apiH.DisableSystem))
+	mux.Handle("POST /api/v1/systems/{id}/enable", steward(apiH.EnableSystem))
+
 	webH, err := web.New(db)
 	if err != nil {
 		return fmt.Errorf("init web handlers: %w", err)

@@ -58,13 +58,13 @@
     font-size: 0.9rem;
 }
 
-/* --- "Add a person" disclosure: stacked fields ------------ */
+/* --- "Add a …" disclosure: stacked fields ----------------- */
 
-.new-person {
+.new-entity {
     margin-bottom: 1.5rem;
 }
 
-.new-person form {
+.new-entity form {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -72,7 +72,7 @@
     padding-top: 0.5rem;
 }
 
-.new-person button {
+.new-entity button {
     flex: none;
 }
 
@@ -87,4 +87,58 @@ dl.meta dd {
     margin-left: 0;
     margin-bottom: 0.5rem;
     color: var(--color-text);
+}
+
+/* --- Disable/enable: action button + disabled banner ------ */
+/* brand.css carries no danger token, so define one here, tracking
+   the same light/dark scheme brand.css uses. */
+
+:root {
+    --color-danger: #b3261e;
+    --color-danger-hover: #8c1d17;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --color-danger: #d65f54;
+        --color-danger-hover: #e58379;
+    }
+}
+
+[data-theme="dark"] {
+    --color-danger: #d65f54;
+    --color-danger-hover: #e58379;
+}
+
+/* The disable/enable toggle sits at the bottom of the detail page,
+   set off from the history above it. */
+.system-action {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.system-action form {
+    margin: 0;
+}
+
+/* The disable action carries its meaning in the label; the red is a
+   secondary cue so it doesn't lean on color alone. */
+button.danger {
+    background: var(--color-danger);
+    color: #ffffff;
+}
+
+button.danger:hover {
+    background: var(--color-danger-hover);
+}
+
+/* Disabled banner: a left rule in the danger color plus muted text,
+   readable in both themes and not dependent on red text contrast. */
+.disabled-banner {
+    margin: 0.5rem 0 0;
+    padding: 0.4rem 0.75rem;
+    border-left: 4px solid var(--color-danger);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
 }

@@ -32,6 +32,8 @@ func httpError(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, core.ErrNotFound):
 		writeError(w, http.StatusNotFound, "not found")
+	case errors.Is(err, core.ErrNameRequired):
+		writeError(w, http.StatusBadRequest, "name is required")
 	case errors.Is(err, core.ErrAlreadyBound):
 		writeError(w, http.StatusConflict, "tenant already bound")
 	default:

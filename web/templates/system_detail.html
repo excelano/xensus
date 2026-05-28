@@ -1,0 +1,64 @@
+{{define "content"}}
+<article>
+  <header>
+    <p><small><a href="/systems">← All systems</a></small></p>
+    <h1>{{.System.Name}}</h1>
+    {{if .System.Disabled}}<p class="disabled-banner">Disabled {{.System.DisabledAt}} by {{.System.DisabledBy}}</p>{{end}}
+  </header>
+
+  {{if .System.Disabled}}
+  <p><small>This system is disabled. Its history is kept for the record; enable it to make it active again.</small></p>
+  {{else if .User.IsSteward}}
+  <form method="post" action="/systems/{{.System.ID}}" class="rename-form">
+    <input type="text" name="name" value="{{.System.Name}}" placeholder="Name" aria-label="Name" required>
+    <button type="submit">Save name</button>
+  </form>
+  {{else}}
+  <p><small>Editing requires steward access.</small></p>
+  {{end}}
+
+  <dl class="meta">
+    <dt>Created</dt>
+    <dd>{{.System.CreatedAt}} · {{.System.CreatedBy}}</dd>
+    <dt>Updated</dt>
+    <dd>{{.System.UpdatedAt}} · {{.System.UpdatedBy}}</dd>
+  </dl>
+
+  <details>
+    <summary>History ({{len .Audit}})</summary>
+    {{if .Audit}}
+    <table>
+      <thead>
+        <tr><th>When</th><th>Action</th><th>By</th><th>Details</th></tr>
+      </thead>
+      <tbody>
+        {{range .Audit}}
+        <tr>
+          <td><small>{{.OccurredAt}}</small></td>
+          <td><code>{{.Action}}</code></td>
+          <td><small>{{.ActorUPN}}</small></td>
+          <td><small>{{.Details}}</small></td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+    {{else}}
+    <p>No recorded history.</p>
+    {{end}}
+  </details>
+
+  {{if .User.IsSteward}}
+  <div class="system-action">
+    {{if .System.Disabled}}
+    <form method="post" action="/systems/{{.System.ID}}/enable">
+      <button type="submit">Enable this system</button>
+    </form>
+    {{else}}
+    <form method="post" action="/systems/{{.System.ID}}/disable">
+      <button type="submit" class="danger">Disable this system</button>
+    </form>
+    {{end}}
+  </div>
+  {{end}}
+</article>
+{{end}}

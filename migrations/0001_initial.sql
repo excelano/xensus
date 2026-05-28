@@ -21,6 +21,8 @@ CREATE TABLE persons (
     updated_by TEXT NOT NULL
 );
 
+-- Systems are disabled, never deleted: disabling drops a system from the
+-- active set but keeps its row and full history for the permanent record.
 CREATE TABLE systems (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -28,8 +30,8 @@ CREATE TABLE systems (
     created_by TEXT NOT NULL,
     updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
     updated_by TEXT NOT NULL,
-    removed_at TEXT,
-    removed_by TEXT
+    disabled_at TEXT,
+    disabled_by TEXT
 );
 
 CREATE TABLE associations (

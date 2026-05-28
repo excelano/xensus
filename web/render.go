@@ -18,6 +18,9 @@ var templatesFS embed.FS
 var pageFiles = map[string]string{
 	"persons_list":  "templates/persons_list.html",
 	"person_detail": "templates/person_detail.html",
+	"systems_list":     "templates/systems_list.html",
+	"system_detail":    "templates/system_detail.html",
+	"disabled_systems": "templates/disabled_systems.html",
 }
 
 // renderer holds one fully-parsed template per page. Parsing happens once

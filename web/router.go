@@ -27,6 +27,14 @@ func (h *Handlers) Register(mux *http.ServeMux, authr *auth.Authenticator) {
 	mux.Handle("POST /persons", steward(h.CreatePerson))
 	mux.Handle("GET /persons/{id}", user(h.PersonDetail))
 	mux.Handle("POST /persons/{id}", steward(h.RenamePerson))
+
+	mux.Handle("GET /systems", user(h.ListSystems))
+	mux.Handle("POST /systems", steward(h.CreateSystem))
+	mux.Handle("GET /systems/disabled", user(h.ListDisabledSystems))
+	mux.Handle("GET /systems/{id}", user(h.SystemDetail))
+	mux.Handle("POST /systems/{id}", steward(h.RenameSystem))
+	mux.Handle("POST /systems/{id}/disable", steward(h.DisableSystem))
+	mux.Handle("POST /systems/{id}/enable", steward(h.EnableSystem))
 }
 
 // requireUser sends anonymous visitors to sign in, preserving where they

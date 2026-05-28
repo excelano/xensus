@@ -17,4 +17,9 @@ var (
 	// ErrNotFound is returned when an operation targets an entity (person,
 	// system, association, …) that does not exist.
 	ErrNotFound = errors.New("not found")
+
+	// ErrNameRequired is returned when a create/rename is attempted with a
+	// blank name on an entity whose name is its identity (a system has no
+	// portable handle, so it must be named).
+	ErrNameRequired = errors.New("name is required")
 )

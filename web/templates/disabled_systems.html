@@ -1,0 +1,27 @@
+{{define "content"}}
+<article>
+  <header>
+    <p><small><a href="/systems">← All systems</a></small></p>
+    <h1>Disabled systems</h1>
+    <p><small>{{len .Systems}} disabled.</small></p>
+  </header>
+
+  {{if .Systems}}
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Disabled</th></tr>
+    </thead>
+    <tbody>
+      {{range .Systems}}
+      <tr>
+        <td><a href="/systems/{{.ID}}">{{.Name}}</a></td>
+        <td><small>{{.DisabledAt}} · {{.DisabledBy}}</small></td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p>No systems are disabled.</p>
+  {{end}}
+</article>
+{{end}}

@@ -1,0 +1,49 @@
+{{define "content"}}
+<article>
+  <header>
+    <h1>Systems</h1>
+    <p><small>{{len .Systems}} {{if eq (len .Systems) 1}}system{{else}}systems{{end}} shown.</small></p>
+  </header>
+
+  <form method="get" action="/systems" class="search-form" role="search">
+    <input type="search" name="q" value="{{.Query}}" placeholder="Search by name" aria-label="Search by name">
+    <button type="submit">Search</button>
+    {{if .Query}}<a href="/systems" class="clear-link">Clear</a>{{end}}
+  </form>
+
+  {{if .User.IsSteward}}
+  <details class="new-entity">
+    <summary>Add a system</summary>
+    <form method="post" action="/systems">
+      <label for="new-name">Name</label>
+      <input type="text" id="new-name" name="name" placeholder="System name" required>
+      <button type="submit">Create</button>
+    </form>
+  </details>
+  {{end}}
+
+  {{if .Systems}}
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Added</th></tr>
+    </thead>
+    <tbody>
+      {{range .Systems}}
+      <tr>
+        <td><a href="/systems/{{.ID}}">{{.Name}}</a></td>
+        <td><small>{{.CreatedAt}} · {{.CreatedBy}}</small></td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p>{{if .Query}}No systems match “{{.Query}}”.{{else}}No systems in the registry yet.{{end}}</p>
+  {{end}}
+
+  {{if .DisabledCount}}
+  <p><small><a href="/systems/disabled">View {{.DisabledCount}} disabled system{{if ne .DisabledCount 1}}s{{end}} →</a></small></p>
+  {{end}}
+
+  <p><small><a href="/api/v1/systems.csv{{if .Query}}?q={{.Query}}{{end}}">Download CSV</a></small></p>
+</article>
+{{end}}
