@@ -143,14 +143,14 @@ button.danger:hover {
     font-size: 0.9rem;
 }
 
-/* --- Associations: per-row remove button -------------------- */
+/* --- Per-row remove button (associations, stewards) --------- */
 /* The remove form lives in a table cell, so it carries no margin and its
    danger button is sized down to sit on one row. */
-.assoc-remove {
+.inline-remove {
     margin: 0;
 }
 
-.assoc-remove button {
+.inline-remove button {
     padding: 0.25rem 0.65rem;
     font-size: 0.85rem;
 }

@@ -30,6 +30,11 @@ func (h *Handlers) Register(mux *http.ServeMux, authr *auth.Authenticator) {
 	mux.Handle("POST /persons/{id}/associations", steward(h.AddAssociation))
 	mux.Handle("POST /persons/{id}/associations/{aid}/remove", steward(h.RemoveAssociation))
 
+	mux.Handle("GET /stewards", user(h.Stewards))
+	mux.Handle("POST /stewards", steward(h.AddSteward))
+	mux.Handle("POST /stewards/{id}/remove", steward(h.RemoveSteward))
+	mux.Handle("POST /stewards/pending/{id}/cancel", steward(h.CancelInvite))
+
 	mux.Handle("GET /systems", user(h.ListSystems))
 	mux.Handle("POST /systems", steward(h.CreateSystem))
 	mux.Handle("GET /systems/disabled", user(h.ListDisabledSystems))

@@ -1,0 +1,77 @@
+{{define "content"}}
+<article>
+  <header>
+    <h1>Stewards</h1>
+    <p><small>Stewards can add and edit registry data and promote or remove other stewards.</small></p>
+  </header>
+
+  {{if .User.IsSteward}}
+  <details class="new-entity">
+    <summary>Invite a steward</summary>
+    <form method="post" action="/stewards">
+      <label for="invite-upn">User principal name (UPN)</label>
+      <input type="email" id="invite-upn" name="upn" placeholder="person@yourtenant.com" required>
+      <button type="submit">Invite</button>
+    </form>
+    <p><small>They become a steward the next time they sign in.</small></p>
+  </details>
+  {{end}}
+
+  {{if .Stewards}}
+  <table>
+    <thead>
+      <tr><th>Steward</th><th>Since</th>{{if $.User.IsSteward}}<th></th>{{end}}</tr>
+    </thead>
+    <tbody>
+      {{range .Stewards}}
+      <tr>
+        <td>{{.UPN}}{{if .IsSelf}} <small>(you)</small>{{end}}</td>
+        <td><small>{{.PromotedAt}} · {{.PromotedBy}}</small></td>
+        {{if $.User.IsSteward}}
+        <td>
+          {{if .IsSelf}}
+          <small>—</small>
+          {{else}}
+          <form method="post" action="/stewards/{{.ID}}/remove" class="inline-remove"
+                onsubmit="return confirm('Remove {{.UPN}} as a steward? They lose steward access until re-invited.');">
+            <button type="submit" class="danger">Remove</button>
+          </form>
+          {{end}}
+        </td>
+        {{end}}
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p>No stewards yet.</p>
+  {{end}}
+
+  {{if .User.IsSteward}}
+  {{if .Pending}}
+  <section class="pending-stewards">
+    <h2>Pending invitations</h2>
+    <table>
+      <thead>
+        <tr><th>Invited</th><th>By</th><th></th><th></th></tr>
+      </thead>
+      <tbody>
+        {{range .Pending}}
+        <tr>
+          <td>{{.UPN}}</td>
+          <td><small>{{.InvitedAt}} · {{.InvitedBy}}</small></td>
+          <td><small>Will become a steward on first sign-in</small></td>
+          <td>
+            <form method="post" action="/stewards/pending/{{.ID}}/cancel" class="inline-remove">
+              <button type="submit" class="danger">Cancel</button>
+            </form>
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </section>
+  {{end}}
+  {{end}}
+</article>
+{{end}}

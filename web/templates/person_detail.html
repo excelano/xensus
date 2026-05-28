@@ -37,7 +37,7 @@
           <td><small>{{.CreatedAt}} · {{.CreatedBy}}</small></td>
           {{if $.User.IsSteward}}
           <td>
-            <form method="post" action="/persons/{{$.Person.ID}}/associations/{{.ID}}/remove" class="assoc-remove"
+            <form method="post" action="/persons/{{$.Person.ID}}/associations/{{.ID}}/remove" class="inline-remove"
                   onsubmit="return confirm('Remove the {{.SystemName}} association? This cannot be undone.');">
               <button type="submit" class="danger">Remove</button>
             </form>

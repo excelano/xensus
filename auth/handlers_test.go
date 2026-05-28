@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"io"
@@ -8,6 +9,9 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/excelano/xensus/core"
+	"github.com/excelano/xensus/store"
 )
 
 func newTestSessionStore(t *testing.T) *SessionStore {
@@ -84,6 +88,7 @@ func TestCompleteSignIn_HappyPath(t *testing.T) {
 	a := &Authenticator{
 		tenantID: "tenant-good",
 		sessions: newTestSessionStore(t),
+		db:       newTestDB(t),
 	}
 	ls := &loginData{State: "s", Nonce: "n", ReturnTo: "/dashboard", Exp: time.Now().Add(time.Minute).Unix()}
 	claims := Claims{OID: "u-1", UPN: "user@good", TID: "tenant-good", Nonce: "n"}
@@ -106,6 +111,47 @@ func TestCompleteSignIn_HappyPath(t *testing.T) {
 	}
 	if !found {
 		t.Errorf("session cookie not set on happy path")
+	}
+}
+
+// TestCompleteSignIn_ClaimsPendingSteward proves the Slice 7 wiring: a user
+// who was invited by UPN becomes an active steward the moment they sign in,
+// without any extra action. The tenant is already bound, so this exercises
+// the bound-mode claim path rather than bootstrap.
+func TestCompleteSignIn_ClaimsPendingSteward(t *testing.T) {
+	db := newTestDB(t)
+	a := &Authenticator{
+		tenantID: "tenant-good",
+		sessions: newTestSessionStore(t),
+		db:       db,
+	}
+	ctx := context.Background()
+
+	// A steward invites a colleague by UPN.
+	inviter := core.Actor{OID: "inviter-oid", UPN: "inviter@good"}
+	if _, err := core.PromoteSteward(ctx, db, inviter, "colleague@good"); err != nil {
+		t.Fatalf("seed invite: %v", err)
+	}
+
+	// The colleague signs in for the first time.
+	ls := &loginData{State: "s", Nonce: "n", ReturnTo: "/", Exp: time.Now().Add(time.Minute).Unix()}
+	claims := Claims{OID: "colleague-oid", UPN: "colleague@good", TID: "tenant-good", Nonce: "n"}
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/auth/callback", nil)
+	a.completeSignIn(w, r, claims, ls)
+
+	if w.Code != http.StatusFound {
+		t.Fatalf("want 302, got %d (body=%q)", w.Code, w.Body.String())
+	}
+	active, err := store.IsActiveSteward(ctx, db, "colleague-oid")
+	if err != nil {
+		t.Fatalf("is active: %v", err)
+	}
+	if !active {
+		t.Error("colleague did not become a steward at sign-in")
+	}
+	if _, err := store.GetPendingStewardByUPN(ctx, db, "colleague@good"); err == nil {
+		t.Error("pending invitation was not consumed at sign-in")
 	}
 }
 

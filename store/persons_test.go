@@ -15,6 +15,10 @@ func openTestDB(t *testing.T) *sql.DB {
 	if err != nil {
 		t.Fatalf("open in-memory sqlite: %v", err)
 	}
+	// A modernc.org/sqlite ":memory:" database is per-connection; pin the
+	// pool to one connection so every query sees the migrated schema and a
+	// leaked transaction fails fast rather than silently hitting a blank DB.
+	db.SetMaxOpenConns(1)
 	t.Cleanup(func() { _ = db.Close() })
 	if err := ApplyMigrations(db); err != nil {
 		t.Fatalf("apply migrations: %v", err)

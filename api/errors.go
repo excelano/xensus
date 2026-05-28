@@ -34,6 +34,14 @@ func httpError(w http.ResponseWriter, err error) {
 		writeError(w, http.StatusNotFound, "not found")
 	case errors.Is(err, core.ErrNameRequired):
 		writeError(w, http.StatusBadRequest, "name is required")
+	case errors.Is(err, core.ErrUPNRequired):
+		writeError(w, http.StatusBadRequest, "upn is required")
+	case errors.Is(err, core.ErrAlreadySteward):
+		writeError(w, http.StatusConflict, "already a steward")
+	case errors.Is(err, core.ErrAlreadyInvited):
+		writeError(w, http.StatusConflict, "already invited")
+	case errors.Is(err, core.ErrSelfRemoval):
+		writeError(w, http.StatusConflict, "a steward cannot remove themselves")
 	case errors.Is(err, core.ErrAlreadyBound):
 		writeError(w, http.StatusConflict, "tenant already bound")
 	default:

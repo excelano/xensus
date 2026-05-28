@@ -18,6 +18,10 @@ func newTestDB(t *testing.T) *sql.DB {
 	if err != nil {
 		t.Fatalf("open sqlite: %v", err)
 	}
+	// A modernc.org/sqlite ":memory:" database is per-connection, so a pool
+	// that opens a second connection sees an empty schema. Pin the pool to a
+	// single connection so every query hits the migrated database.
+	db.SetMaxOpenConns(1)
 	t.Cleanup(func() { _ = db.Close() })
 	if err := store.ApplyMigrations(db); err != nil {
 		t.Fatalf("migrations: %v", err)

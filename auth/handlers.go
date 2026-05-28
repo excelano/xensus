@@ -160,6 +160,19 @@ func (a *Authenticator) completeSignIn(w http.ResponseWriter, r *http.Request, c
 		return
 	}
 
+	// A standing invitation is claimed at sign-in: if this UPN was promoted
+	// by a steward, they become an active steward now. A claim failure is
+	// logged but doesn't block sign-in — the pending row survives the
+	// rolled-back Tx, so the next sign-in retries; the user just signs in as
+	// a non-steward in the meantime. The steward bit itself is read fresh per
+	// request by the middleware, so it takes effect immediately on the next
+	// request regardless of session timing.
+	if claimed, err := core.ClaimPendingSteward(r.Context(), a.db, core.Actor{OID: c.OID, UPN: c.UPN}); err != nil {
+		slog.Error("claim pending steward failed", "err", err, "upn", c.UPN)
+	} else if claimed {
+		slog.Info("pending steward claimed at sign-in", "upn", c.UPN, "oid", c.OID)
+	}
+
 	if err := a.sessions.WriteSession(w, r, sessionData{
 		OID: c.OID,
 		UPN: c.UPN,

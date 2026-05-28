@@ -21,6 +21,7 @@ var pageFiles = map[string]string{
 	"systems_list":     "templates/systems_list.html",
 	"system_detail":    "templates/system_detail.html",
 	"disabled_systems": "templates/disabled_systems.html",
+	"stewards":         "templates/stewards.html",
 }
 
 // renderer holds one fully-parsed template per page. Parsing happens once

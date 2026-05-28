@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/excelano/xensus/store"
 )
 
 // BootstrapClaim is the subset of an OIDC token claim set that Bootstrap
@@ -53,16 +55,9 @@ func Bootstrap(ctx context.Context, db *sql.DB, c BootstrapClaim) (stewardID int
 		return 0, fmt.Errorf("bind tenant: %w", err)
 	}
 
-	res, err := tx.ExecContext(ctx,
-		`INSERT INTO stewards (user_oid, user_upn, promoted_by) VALUES (?, ?, 'bootstrap')`,
-		c.OID, c.UPN,
-	)
+	stewardID, err = store.InsertSteward(ctx, tx, c.OID, c.UPN, "bootstrap")
 	if err != nil {
 		return 0, fmt.Errorf("create first steward: %w", err)
-	}
-	stewardID, err = res.LastInsertId()
-	if err != nil {
-		return 0, fmt.Errorf("read steward id: %w", err)
 	}
 
 	if err = WriteAudit(ctx, tx, AuditEntry{
