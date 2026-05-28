@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/excelano/xensus/auth"
 	"github.com/excelano/xensus/config"
 	"github.com/excelano/xensus/store"
 )
@@ -31,8 +32,19 @@ func Run(ctx context.Context, cfg *config.Config) error {
 		"db_file", "xensus.sqlite",
 	)
 
+	authr, err := auth.New(ctx, cfg, db)
+	if err != nil {
+		slog.Warn("auth disabled — only /health is available", "reason", err.Error())
+		authr = nil
+	} else {
+		slog.Info("auth ready", "tenant_id", authr.TenantID())
+		if authr.SessionKeyGenerated() {
+			slog.Warn("XENSUS_SESSION_KEY unset; sessions will be lost on restart — generate a key and set it before going to production")
+		}
+	}
+
 	mux := http.NewServeMux()
-	registerRoutes(mux, db)
+	registerRoutes(mux, db, authr)
 
 	srv := &http.Server{
 		Addr:              cfg.Listen,

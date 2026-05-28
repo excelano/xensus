@@ -46,6 +46,26 @@ func FromEnv() (*Config, error) {
 	return c, nil
 }
 
+// RequireOIDC returns an error listing every OIDC env var that is unset.
+// Slice 2 reads the values lazily; Slice 3a calls this at the moment
+// the auth package actually needs them.
+func (c *Config) RequireOIDC() error {
+	var missing []string
+	if c.OIDCClientID == "" {
+		missing = append(missing, "XENSUS_OIDC_CLIENT_ID")
+	}
+	if c.OIDCClientSecret == "" {
+		missing = append(missing, "XENSUS_OIDC_CLIENT_SECRET")
+	}
+	if c.OIDCRedirectURL == "" {
+		missing = append(missing, "XENSUS_OIDC_REDIRECT_URL")
+	}
+	if len(missing) > 0 {
+		return fmt.Errorf("OIDC env vars required but unset: %s", strings.Join(missing, ", "))
+	}
+	return nil
+}
+
 func envOrDefault(key, def string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
