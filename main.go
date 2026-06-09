@@ -22,7 +22,7 @@ var version = "(devel)"
 func main() {
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
-		case "--version", "-v", "version":
+		case "--version", "-V", "version":
 			fmt.Println("xensus " + version)
 			return
 		case "--help", "-h", "help":
