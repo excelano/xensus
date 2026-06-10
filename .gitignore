@@ -39,3 +39,4 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+update-axe.sh
