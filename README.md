@@ -77,7 +77,8 @@ sudo install -m 0755 xensus /usr/local/bin/xensus
 
 ### From source
 
-Requires Go 1.22 or newer:
+With a Go toolchain — `go.mod` names the version it needs, and Go fetches that
+toolchain automatically if yours is older:
 
 ```sh
 go install github.com/excelano/xensus@latest
