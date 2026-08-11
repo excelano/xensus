@@ -46,13 +46,13 @@ type pendingWebRow struct {
 func (h *Handlers) Stewards(w http.ResponseWriter, r *http.Request) {
 	stewards, err := store.ListActiveStewards(r.Context(), h.DB)
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web list stewards", "err", err)
+		slog.ErrorContext(r.Context(), "web list stewards", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	pending, err := store.ListPendingStewards(r.Context(), h.DB)
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web list pending stewards", "err", err)
+		slog.ErrorContext(r.Context(), "web list pending stewards", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -88,7 +88,7 @@ func (h *Handlers) AddSteward(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "that user already has a pending invitation", http.StatusConflict)
 		return
 	case err != nil:
-		slog.ErrorContext(r.Context(),"web promote steward", "err", err)
+		slog.ErrorContext(r.Context(), "web promote steward", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -115,7 +115,7 @@ func (h *Handlers) RemoveSteward(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "you cannot remove yourself — promote a successor first", http.StatusConflict)
 		return
 	case err != nil:
-		slog.ErrorContext(r.Context(),"web demote steward", "err", err)
+		slog.ErrorContext(r.Context(), "web demote steward", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -137,7 +137,7 @@ func (h *Handlers) CancelInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web cancel invite", "err", err)
+		slog.ErrorContext(r.Context(), "web cancel invite", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}

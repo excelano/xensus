@@ -63,13 +63,13 @@ func (h *Handlers) ListSystems(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	systems, err := store.ListSystems(r.Context(), h.DB, q)
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web list systems", "err", err)
+		slog.ErrorContext(r.Context(), "web list systems", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	disabledCount, err := store.CountDisabledSystems(r.Context(), h.DB)
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web count disabled systems", "err", err)
+		slog.ErrorContext(r.Context(), "web count disabled systems", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -86,7 +86,7 @@ func (h *Handlers) ListSystems(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) ListDisabledSystems(w http.ResponseWriter, r *http.Request) {
 	systems, err := store.ListDisabledSystems(r.Context(), h.DB)
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web list disabled systems", "err", err)
+		slog.ErrorContext(r.Context(), "web list disabled systems", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -111,13 +111,13 @@ func (h *Handlers) SystemDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web get system", "err", err)
+		slog.ErrorContext(r.Context(), "web get system", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	rows, err := store.ListAuditForEntity(r.Context(), h.DB, "system", sid)
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web system audit", "err", err)
+		slog.ErrorContext(r.Context(), "web system audit", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -142,7 +142,7 @@ func (h *Handlers) CreateSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web create system", "err", err)
+		slog.ErrorContext(r.Context(), "web create system", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -170,7 +170,7 @@ func (h *Handlers) RenameSystem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web rename system", "err", err)
+		slog.ErrorContext(r.Context(), "web rename system", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -208,7 +208,7 @@ func (h *Handlers) toggleSystem(
 		return
 	}
 	if err != nil {
-		slog.ErrorContext(r.Context(),logMsg, "err", err)
+		slog.ErrorContext(r.Context(), logMsg, "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}

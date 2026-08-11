@@ -69,13 +69,13 @@ func (h *Handlers) Audit(w http.ResponseWriter, r *http.Request) {
 		Limit:      store.DefaultAuditLimit,
 	})
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web list audit", "err", err)
+		slog.ErrorContext(r.Context(), "web list audit", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	actors, err := store.ListAuditActors(r.Context(), h.DB)
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web list audit actors", "err", err)
+		slog.ErrorContext(r.Context(), "web list audit actors", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}

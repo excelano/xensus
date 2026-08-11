@@ -60,7 +60,7 @@ func (h *Handlers) ListPersons(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	persons, err := store.ListPersons(r.Context(), h.DB, q)
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web list persons", "err", err)
+		slog.ErrorContext(r.Context(), "web list persons", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -102,25 +102,25 @@ func (h *Handlers) PersonDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web get person", "err", err)
+		slog.ErrorContext(r.Context(), "web get person", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	links, err := store.ListAssociationsForPerson(r.Context(), h.DB, pid)
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web list associations", "err", err)
+		slog.ErrorContext(r.Context(), "web list associations", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	systems, err := store.ListSystems(r.Context(), h.DB, "")
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web list systems for associate", "err", err)
+		slog.ErrorContext(r.Context(), "web list systems for associate", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	rows, err := store.ListAuditForEntity(r.Context(), h.DB, "person", pid)
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web person audit", "err", err)
+		slog.ErrorContext(r.Context(), "web person audit", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -143,7 +143,7 @@ func (h *Handlers) CreatePerson(w http.ResponseWriter, r *http.Request) {
 	}
 	p, err := core.CreatePerson(r.Context(), h.DB, actorFrom(r), r.PostFormValue("name"))
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web create person", "err", err)
+		slog.ErrorContext(r.Context(), "web create person", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
@@ -169,7 +169,7 @@ func (h *Handlers) RenamePerson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		slog.ErrorContext(r.Context(),"web rename person", "err", err)
+		slog.ErrorContext(r.Context(), "web rename person", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}

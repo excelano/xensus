@@ -16,8 +16,8 @@ var templatesFS embed.FS
 // parsed together with layout.html into its own template set, so the
 // {{define "content"}} block in one page never collides with another's.
 var pageFiles = map[string]string{
-	"persons_list":  "templates/persons_list.html",
-	"person_detail": "templates/person_detail.html",
+	"persons_list":     "templates/persons_list.html",
+	"person_detail":    "templates/person_detail.html",
 	"systems_list":     "templates/systems_list.html",
 	"system_detail":    "templates/system_detail.html",
 	"disabled_systems": "templates/disabled_systems.html",
