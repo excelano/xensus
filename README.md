@@ -53,14 +53,14 @@ Xensus ships a single static binary (pure Go, no CGO) for Linux, macOS, and Wind
 curl -fsSL https://raw.githubusercontent.com/excelano/xensus/main/install.sh | sh
 ```
 
-The script resolves the latest release, downloads the binary for your platform, verifies its SHA-256 against the published `checksums.txt`, and installs it to `/usr/local/bin` (falling back to `~/.local/bin` if that isn't writable). Pin a specific version with `XENSUS_VERSION=v1.0.0` or change the target with `XENSUS_INSTALL_DIR=/opt/bin`.
+The script resolves the latest release, downloads the binary for your platform, verifies its SHA-256 against the published `checksums.txt`, and installs it to `/usr/local/bin` (falling back to `~/.local/bin` if that isn't writable). Pin a version by setting `XENSUS_VERSION` to any release tag, or change the target with `XENSUS_INSTALL_DIR=/opt/bin`.
 
 ### Debian / Ubuntu (.deb)
 
 Download the `.deb` for your architecture from the [latest release](https://github.com/excelano/xensus/releases/latest) and install it:
 
 ```sh
-sudo dpkg -i xensus_1.0.0_linux_amd64.deb
+sudo dpkg -i ./xensus_*.deb
 ```
 
 This installs the binary to `/usr/bin/xensus` and the documentation under `/usr/share/doc/xensus/`.
@@ -71,7 +71,7 @@ Download the tarball for your platform from the [releases page](https://github.c
 
 ```sh
 sha256sum -c checksums.txt --ignore-missing
-tar -xzf xensus_1.0.0_linux_amd64.tar.gz xensus
+tar -xzf xensus_*.tar.gz xensus
 sudo install -m 0755 xensus /usr/local/bin/xensus
 ```
 
