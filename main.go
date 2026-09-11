@@ -1,9 +1,8 @@
 // Xensus — identity registry for Microsoft 365 tenants.
 //
 // main.go is just the entrypoint: flag handling, slog setup, and the
-// handoff to Run in server.go. Everything else lives in subpackages
-// (config, store, core, auth, api, web) per the plan at
-// /home/anderix/.claude/plans/lucky-crunching-dawn.md.
+// handoff to Run in server.go. Everything else lives in subpackages:
+// config, store, core, auth, api, web.
 package main
 
 import (

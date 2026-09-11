@@ -1,7 +1,6 @@
 // Package auth handles OIDC sign-in for the web UI, Bearer JWT
 // validation for the REST API, and a unified User context value shared
-// between both paths. See /home/anderix/.claude/plans/lucky-crunching-dawn.md
-// (Slice 3a) for the design decisions captured here.
+// between both paths.
 package auth
 
 import (
