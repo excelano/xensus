@@ -9,10 +9,7 @@ earlier here than anywhere else in the fleet.**
 | | |
 |---|---|
 | Loop | goreleaser |
-| Ships to | the GitHub release, and nowhere else |
-| apt | no — deliberately |
-| winget | no — deliberately |
-| Homebrew | no — `.goreleaser.yml` declares no tap |
+| Packages per release | 2, amd64 arm64 |
 
 **Steps 1 and 2 are the whole procedure.** Run `go build ./... && go test ./...`,
 confirm `git status` is clean, then `git tag v1.2.3 && git push origin main
