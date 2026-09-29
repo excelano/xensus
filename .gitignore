@@ -40,3 +40,4 @@ go.work.sum
 # .idea/
 # .vscode/
 update-axe.sh
+ship.toml
