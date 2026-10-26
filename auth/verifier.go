@@ -1,3 +1,6 @@
+// Author: David M. Anderson
+// Built with AI assistance (Claude, Anthropic)
+
 // Package auth handles OIDC sign-in for the web UI, Bearer JWT
 // validation for the REST API, and a unified User context value shared
 // between both paths.

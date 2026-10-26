@@ -1,3 +1,6 @@
+// Author: David M. Anderson
+// Built with AI assistance (Claude, Anthropic)
+
 // Xensus — identity registry for Microsoft 365 tenants.
 //
 // main.go is just the entrypoint: flag handling, slog setup, and the

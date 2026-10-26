@@ -250,7 +250,7 @@ Reads are open to any signed-in tenant member (unless restricted via `XENSUS_STE
 | `DELETE` | `/api/v1/stewards/pending/{id}` | Steward | Cancel a pending invitation |
 | `GET` | `/api/v1/export` | Steward | Whole registry as a zip of CSVs |
 
-The `/api/v1/` surface is stable as of v1.0.
+The `/api/v1/` path is versioned; a breaking change goes under a new prefix.
 
 ## Data and backups
 

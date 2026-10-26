@@ -1,4 +1,7 @@
 #!/bin/sh
+# Author: David M. Anderson
+# Built with AI assistance (Claude, Anthropic)
+#
 # xensus installer — fetches the latest release binary for the host platform
 # and drops it into /usr/local/bin (or ~/.local/bin if /usr/local/bin is not
 # writable). POSIX sh, no bash extensions.

@@ -1,3 +1,6 @@
+// Author: David M. Anderson
+// Built with AI assistance (Claude, Anthropic)
+
 // Package config parses Xensus's runtime configuration from environment
 // variables. Every value Xensus needs at runtime comes from the environment;
 // there is no config file by design (one less thing to forget when running
@@ -85,8 +88,9 @@ func parseAccess(raw string) (Access, error) {
 }
 
 // FromEnv reads the XENSUS_* environment variables and returns a Config.
-// It validates the values that Slice 2 needs (listen address + data
-// directory); OIDC validation happens once the auth package can use it.
+// It requires a data directory, a listen address with a port, and a
+// well-formed XENSUS_STEWARD_ONLY list; the OIDC values are read here but
+// checked by RequireOIDC, when the auth package needs them.
 func FromEnv() (*Config, error) {
 	c := &Config{
 		Listen:           envOrDefault("XENSUS_LISTEN", ":8080"),
@@ -112,8 +116,7 @@ func FromEnv() (*Config, error) {
 }
 
 // RequireOIDC returns an error listing every OIDC env var that is unset.
-// Slice 2 reads the values lazily; Slice 3a calls this at the moment
-// the auth package actually needs them.
+// The auth package calls it at the moment it needs the values.
 func (c *Config) RequireOIDC() error {
 	var missing []string
 	if c.OIDCClientID == "" {

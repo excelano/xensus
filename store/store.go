@@ -1,3 +1,6 @@
+// Author: David M. Anderson
+// Built with AI assistance (Claude, Anthropic)
+
 // Package store is Xensus's storage layer. It owns the SQLite connection,
 // applies migrations on open, and exposes typed helpers that always accept
 // *sql.Tx — never *sql.DB — so that the core package retains exclusive
