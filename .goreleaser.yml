@@ -78,11 +78,3 @@ release:
   extra_files:
     - glob: install.sh
     - glob: uninstall.sh
-
-changelog:
-  sort: asc
-  use: github
-  filters:
-    exclude:
-      - '^(build|chore|ci|deps|docs|refactor|style|test)(\(.*?\))?!?:'
-      - "^Merge "
