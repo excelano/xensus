@@ -45,7 +45,7 @@ Stewardship passes by invitation. A steward promotes a colleague by UPN; the inv
 
 ## Install
 
-Xensus ships a single static binary (pure Go, no CGO) for Linux, macOS, and Windows on amd64 and arm64.
+Xensus ships a single static binary (pure Go, no CGO) for Linux and macOS on amd64 and arm64, and for Windows on amd64.
 
 ### Quick install (Linux, macOS)
 
