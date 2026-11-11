@@ -45,9 +45,9 @@ Stewardship passes by invitation. A steward promotes a colleague by UPN; the inv
 
 ## Install
 
-Xensus ships a single static binary (pure Go, no CGO) for Linux and macOS on amd64 and arm64, and for Windows on amd64.
+Xensus ships a single static binary (pure Go, no CGO) for Linux on amd64 and arm64, and for Windows on amd64. On macOS, install it from source with `go install` (below).
 
-### Quick install (Linux, macOS)
+### Quick install (Linux)
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/excelano/xensus/main/install.sh | sh
@@ -67,7 +67,7 @@ This installs the binary to `/usr/bin/xensus` and the documentation under `/usr/
 
 ### Manual
 
-Download the tarball for your platform from the [releases page](https://github.com/excelano/xensus/releases), verify it against `checksums.txt`, and extract the binary onto your `PATH`:
+Download the Linux archive for your architecture from the [releases page](https://github.com/excelano/xensus/releases), verify it against `checksums.txt`, and extract the binary onto your `PATH`:
 
 ```sh
 sha256sum -c checksums.txt --ignore-missing

@@ -35,8 +35,8 @@ detect_platform() {
 	OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 	ARCH=$(uname -m)
 	case "$OS" in
-		linux|darwin) ;;
-		*) err "unsupported OS: $OS (xensus ships linux + darwin binaries)";;
+		linux) ;;
+		*) err "unsupported OS: $OS (xensus ships Linux binaries; elsewhere, go install github.com/excelano/xensus@latest)";;
 	esac
 	case "$ARCH" in
 		x86_64|amd64) ARCH=amd64 ;;
