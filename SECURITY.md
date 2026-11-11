@@ -6,7 +6,6 @@ Please report suspected vulnerabilities privately, using the **Report a vulnerab
 
 Please do not open public issues for security problems.
 
-
 ## Supported versions
 
 The latest release receives security fixes. Older versions are not supported. A fix ships in a new release; update the way you installed.
